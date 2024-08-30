@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "None",
+    "noImplicitAny": false,
+    "outDir": "dist",
+    "baseUrl": ".",
+    "target": "ESNext",
+    "allowJs": true,
+    "lib": ["ESNext","DOM"],
+    "skipLibCheck": true,
+    "diagnostics": true,
+  },
+}
+

@@ -1,0 +1,128 @@
+:root {
+    /*   color variables */
+    --clr-primary: #0e48fe;
+    --clr-primary-hover: #29e6a7;
+    --clr-primary-dark: #039d69;
+    --clr-gray100: #fafafa;
+    --clr-gray150: #fbfbfb;
+    --clr-gray200: #f0f0f0;
+    --clr-gray300: #dfdfdf;
+    --clr-gray400: #818181;
+    --clr-gray500: #5a5a5a;
+    --clr-gray600: #363636;
+    --clr-gray700: rgb(46, 46, 46);
+    --clr-notification-hover: #ffebeb;
+    --clr-notification: #ffc2c2;
+    --clr-notification-dark: #e00000;
+    --radius: 0.2rem;
+}
+
+body {
+    background-color: rgb(22, 22, 22);
+    color: white;
+    font-family: Mukta, Helvetica, sans-serif;
+    overflow: hidden;
+}
+
+.text {
+    font-size: 1.2rem;
+    font-weight: 200;
+    overflow: wrap;
+}
+
+.main-content {
+    width: 60%;
+    height: 100%;
+    margin-top: -10px;
+    margin-left: 40%;
+    font-weight: 200;
+    bottom: -1%;
+
+}
+
+#video_name {
+    margin-left: 4%;
+    font-size: large;
+    font-weight: 800;
+    overflow: hidden;
+    inline-size: 280px;
+}
+
+#video_creator {
+    margin-left: 4%;
+    font-weight: 100;
+    font-size: medium;
+    overflow: hidden;
+    inline-size: 285px;
+}
+
+#main {
+    display: flex;
+    width: max-content;
+    height: max-content;
+    overflow: hidden;
+}
+
+#video_image {
+    top: 2vh;
+    background: no-repeat center/100% url("../YTlogo4.png");
+    object-fit: cover;
+    position: relative;
+    display: inline-block;
+}
+
+#time-content {
+    top: 2vh;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(to top, grey, lightgrey);
+    border-radius: 1px;
+    display: block;
+    position: relative;
+    border-radius: 1px;
+    /* overflow: hidden; */
+}
+
+#time_bar {
+    margin-top: 5%;
+    width: 50%;
+    height: 5px;
+    background-size: 120%;
+    background-color: rgb(0, 153, 255);
+    background-image: linear-gradient(
+        to left,
+        rgb(181, 38, 150),
+        rgb(47, 123, 193)
+    );
+}
+
+#time {
+    text-align: center;
+    border-radius: 1px;
+    font-size: larger;
+    font-weight: 500;
+    top: -2px;
+    position: relative;
+    margin-top: 0%;
+}
+
+#bold {
+    font-weight: bold;
+    font-size: larger;
+}
+
+#settings {
+    left: 1%;
+    bottom: 1%;
+    height: 35px;
+    width: 25px;
+    overflow: hidden;
+    position: fixed;
+    font-size: 22px;
+}
+
+#settings:hover {
+    background: linear-gradient(to top, rgb(181, 38, 150), rgb(47, 123, 193));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}

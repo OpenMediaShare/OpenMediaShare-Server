@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.js"
+            integrity="sha512-9mpsATI0KClwt+xVZfbcf2lJ8IFBAwsubJ6mI3rtULwyM3fBmQFzj0It4tGqxLOGQwGfJdk/G+fANnxfq9/cew=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        ></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Mukta:wght@300&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css"
+        />
+        <link rel="stylesheet" href="./css/main.css">
+        <link rel="stylesheet" href="" id="theme" />
+        
+        <title>WatchRPC</title>
+    </head>
+    <body>
+        <div id="main">
+            <div id="image-container">
+                <div id="video_image"></div>
+                <div id="progress1"></div>
+            </div>
+            <div id="main_text">
+                <div id="text-theme-box">
+                    <p id="video_name">Video Name [None]</p>
+                    <p id="video_creator">Video creator [None]</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="time-content">
+            <div id="time_bar"></div>
+            <p id="time">#:## / #:##</p>
+        </div>
+        <i
+            class="bi bi-gear"
+            id="settings"
+            onclick="window.settings.settings()"
+        ></i>
+    </body>
+    <script src="../dist/renderer.js"></script>
+    <script src="../dist/themeManager.js"></script>
+</html>

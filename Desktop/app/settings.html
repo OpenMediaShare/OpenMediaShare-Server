@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Mukta:wght@300&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="./css/style2.css" />
+        <title>WatchRPC</title>
+        <h2 id="game" class="text">Settings</h2>
+        <div class="main-content">
+            <p id="services_text">
+                Select the Platform <br />you want displayed
+            </p>
+            <form>
+                <select id="services" name="services">
+                    <option value="ytmusic">YTmusic</option>
+                    <option value="spotify">Spotify</option>
+                    <option value="applemusic">Apple Music</option>
+                </select>
+            </form>
+            <div id="checkboxs-area">
+                <input type="checkbox" id="TTY" name="TTY" />
+                <label for="TTY">showTTY</label><br />
+                <input type="checkbox" id="ErrNote" name="ErrNote" />
+                <label for="ErrNote">Error Notifications</label><br />
+                <input type="checkbox" id="RPCServer" name="RPCServer" />
+                <label for="RPCServer">RPC Server</label><br />
+
+                <div class="bi bi-question-square" id="checkbox-help"></div>
+                <p id="checkbox-help-text">
+                    ShowTTY Enables terminal uutput if ran from the command
+                    line<br /><br />
+                </p>
+            </div>
+            <p id="theme_text">Theme the app <br />will use</p>
+            <form>
+                <select id="theme" name="theme">
+                    <option value="flatDark">flatDark</option>
+                    <option value="flatLight">flatLight</option>
+                    <option value="neonDark">neonDark</option>
+                    <option value="neonLight">neonLight</option>
+                    <option value="winAcrylic">Acrylic</option>
+                    <option value="ipodClassic">iPod</option>
+                </select>
+            </form>
+        </div>
+        <button class="button_type_1" type="button" id="close_button">
+            Close
+        </button>
+        <script>
+            const func = async () => {
+                const r = await window.settings.getStatus();
+                console.log(r);
+                document.getElementById("services").value = r.mode;
+                document.getElementById("TTY").checked = Boolean(r.showTTY);
+                document.getElementById("theme").value = r.theme;
+                document.getElementById("ErrNote").checked = r.errNote;
+                document.getElementById('RPCServer').checked = r.RPCServer;
+            };
+            func();
+            document
+                .getElementById("checkbox-help")
+                .addEventListener("mouseenter", (t) => {
+                    document.getElementById(
+                        "checkbox-help-text",
+                    ).style.display = "block";
+                });
+            document
+                .getElementById("checkbox-help")
+                .addEventListener("mouseleave", (t) => {
+                    document.getElementById(
+                        "checkbox-help-text",
+                    ).style.display = "none";
+                });
+        </script>
+        <script src="../dist/renderer.js"></script>
+        <script src="../dist/themeManager.js"></script>
+    </head>
+</html>

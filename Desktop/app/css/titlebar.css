@@ -1,0 +1,71 @@
+:root {
+    /*   color variables */
+    --clr-primary: #0e48fe;
+    --clr-primary-hover: #29e6a7;
+    --clr-primary-dark: #039d69;
+    --clr-gray100: #fafafa;
+    --clr-gray150: #fbfbfb;
+    --clr-gray200: #f0f0f0;
+    --clr-gray300: #dfdfdf;
+    --clr-gray400: #818181;
+    --clr-gray500: #5a5a5a;
+    --clr-gray600: #363636;
+    --clr-gray700: rgb(46, 46, 46);
+    --clr-notification-hover: #ffebeb;
+    --clr-notification: #ffc2c2;
+    --clr-notification-dark: #e00000;
+    --radius: 0.2rem;
+}
+
+
+.titlebar {
+    top: 0px;
+    height: 24px;
+    right: 0px;
+    width: 18%;
+    /* outline: 2px solid #2f3241; */
+    background: linear-gradient(to top, #2f3241 0%, #44495e 100%);
+    /* background: linear-gradient(to left, #211644 0%, #311740 100%); */
+    background-color: rgb(15, 15, 15);
+    position: fixed;
+    overflow: hidden;
+}
+
+.titlebar2 {
+    left: 1px;
+    top: 0px;
+    height: 24px;
+    width: 82%;
+    -webkit-app-region: drag;
+    outline: 0.01px solid #002aff00;
+    background: linear-gradient(to bottom, #2f3241 0%, #242732 100%);
+
+    background-color: rgb(15, 15, 15);
+    position: fixed;
+    overflow: hidden;
+}
+
+#Exit-button {
+    /* align-content: center;
+	align-items: center; */
+
+    left: 90%;
+    top: -7px;
+    height: 18px;
+    width: 18px;
+    /* box-shadow: #e00000 0px 0px 0px 1px; */
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+}
+
+#Min-button {
+    left: 86.5%;
+    top: -7px;
+    height: 18px;
+    width: 18px;
+    /* box-shadow: #e00000 0px 0px 0px 1px; */
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+}
