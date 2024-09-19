@@ -11,16 +11,17 @@ const server = new http.Server(webServer);
 const wss = new WebSocketServer({ server });
 
 
-
+webServer.use(cors({origin: '*'}));
 webServer.use(bodyParser.json());
 webServer.use((req, res, next) => {
     console.log(`[RestAPI] [Debug] [${req.method}]: ${req.url}`);
+    console.log(req.body);
     // console.log(`    ${JSON.stringify(req.body)}`);
     if (req.method !== 'POST') {next(); return;}
     if (req.body.auth !== undefined && req.body.auth.uuid !== undefined) {next(); return;}
     res.sendStatus(400);
     console.log('[RestAPI] [Warn]: Caught packet without UUID, ignoring.');
-
+    
 });
 
 webServer.use((req, res, next) => {
@@ -31,11 +32,12 @@ webServer.use((req, res, next) => {
 
     if(authManager.activeClient === null) {
         authManager.addClient(req.body.auth);
-        return;
+
     } else {
         authManager.addClientSilent(req.body.auth);
-        return;
+
     }
+
 
     next();
     return;
@@ -213,7 +215,7 @@ webServer.get('/api/media/time',(req,res) => {
 //     ws.send('something');
 // });
 
-export function restSetup(){
+export async function restSetup(){
     return new Promise((res,rej) => {
         server.listen(9494)
             .once('listening', res)

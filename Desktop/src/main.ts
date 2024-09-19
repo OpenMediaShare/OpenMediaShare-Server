@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// if(require('electron-squirrel-startup')) return;
 if (require('electron-squirrel-startup')) process.exit();
 import path from 'path';
 import * as positron from './positron';
@@ -23,7 +21,7 @@ const tray: Tray = null;
 
 console.clear = () => {
     console.log('\x1b[2J\x1b[H\x1bc');
-}; //since console.clear() stil doesn't work on windows :face_palm:
+}; //since console.clear() still doesn't work on windows :face_palm:
 
 
 
@@ -128,10 +126,6 @@ app.whenReady().then(() => {
     console.log('Starting Plugins');
     pluginManager.startPlugins();
 });
-
-
-
-
 
 
 restSetup()

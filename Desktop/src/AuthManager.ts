@@ -3,7 +3,7 @@ import { PushError } from './utils';
 import { app, Notification } from 'electron';
 interface Client {
     name: string,
-    uuid: string
+    uuid: string,
 }
 
 export class AuthManager {
