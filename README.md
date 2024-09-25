@@ -1,8 +1,11 @@
 # OpenMediaShare
 A program built to manage playback[^2], and share playing media data to local running apps using a RestAPI and or Websockets[^1].
 
-
-
+## Serivce Providers 
+Service Proiders are anything that feeds media data into the program.
+* WaterWolf5918/OpenMediaShare-Browser
+* WaterWolf5918/OpenMediaShare-Spicetify
+  
 ## Plugins 
 > [!CAUTION]
 > **Only install plugins from developers you trust.**
@@ -17,3 +20,6 @@ List of trusted plugins
 
 [^1]: Websockets are not currently supported but are planned.
 [^2]: Playback controlls are currently not support and will be service depended once added.
+### Developers
+> [!TIP]
+> Look at the [wiki](https://github.com/WaterWolf5918/OpenMediaShare/wiki/) for documentation on stuff like the protocol.
