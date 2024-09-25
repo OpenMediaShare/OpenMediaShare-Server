@@ -1,0 +1,142 @@
+
+
+:root {
+    /*   color variables */
+    --clr-primary: #0e48fe;
+    --background: #1a1b26;
+    --sidebar: #16161e;
+    --radius: 0.2rem;
+    --main-back: null;
+    --mainText-back: null;
+    --videoName-text-weight: 800;
+    --videocreator-text-weight: 100;
+    --timeBar-back-graident: linear-gradient(to top, grey, lightgrey);
+    --timeBar-graident: linear-gradient(
+        to left,
+        rgb(181, 38, 150),
+        rgb(47, 123, 193)
+    );
+    --timeBar-color-backup: rgb(0, 153, 255);
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+body {
+    background-color: var(--background);
+    color: white;
+    font-family: Mukta, Helvetica, sans-serif;
+    overflow: hidden;
+}
+
+
+#sidebyside {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-direction: row;
+}
+
+#sidebar {
+    /* margin: 10px 0px 0px 0px; */
+    padding: 10px 0px 10px 0px;
+    display: flex;
+    height: 100%;
+    width: 5rem;
+    flex-direction: column;
+    background: var(--sidebar);
+}
+
+
+.sidebar-item{
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 10px 0px 10px 0px;
+    user-select: none;
+}
+
+
+.sidebar-item:hover{
+    background: #1a1b27;
+}
+
+.sidebar-item-active{
+    background: #3b2257;
+}
+
+.sidebar-item-active:hover{
+    background: #3b2257;
+}
+
+.sidebar-item-icon {
+    font-size: 2.5rem !important;
+}
+
+#main {
+    /* display: flex; */
+    width: 100%;
+    height: 100%;
+}
+
+.master-page {
+    display: flex;
+    width: 100%;
+    /* height: 100%; */
+}
+
+.home-page {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
+.home-page > table {
+    width: 100%;
+}
+
+table {
+    border-spacing: 0px 5px;
+}
+
+th {
+    background: #16161e;
+}
+
+td {
+
+    /* width: 200px; */
+    text-align: center;
+    justify-content: center;
+    /* height: 100px; */
+    /* padding:5px 0px 5px 0px; */
+
+    background: #22222f;
+}
+
+
+.home-page-table-image-center {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
+.home-page-table-status {
+    width: 64px;
+}
+
+.home-page-table-status-icon {
+    font-size: 2rem !important;
+}
+
+
+@media (max-width: 900px) {
+    .home-page-table-uuid {
+        display: none;
+    }
+}
