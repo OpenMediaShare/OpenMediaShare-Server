@@ -35,7 +35,7 @@ class TypedEventEmitter<TEvents extends Record<string, any>> {
 
 type LocalEventTypes = {
     videoUpdated: [
-        video: VideoMetadata['video']
+        video: VideoMetadata['data']
     ],
     timeUpdated: [
         time: VideoMetadata['time']
@@ -50,7 +50,7 @@ type LocalEventTypes = {
 
 export class InfoStore extends TypedEventEmitter<LocalEventTypes>{
     info: VideoMetadata = {
-        video: {
+        data: {
             creator: 'WatchRPC v3',
             title: 'Waiting for REST API',
             views: '',
@@ -75,8 +75,8 @@ export class InfoStore extends TypedEventEmitter<LocalEventTypes>{
     }
 
     /** @deprecated */
-    setVideo(video: VideoMetadata['video']) {
-        this.info.video = video;
+    setVideo(video: VideoMetadata['data']) {
+        this.info.data = video;
         this.emit('videoUpdated', video);
         this.emit('infoUpdated', this.info);
     }
@@ -116,7 +116,7 @@ export class InfoStore extends TypedEventEmitter<LocalEventTypes>{
 
     blank() {
         this.info = {
-            video: {
+            data: {
                 creator: 'WatchRPC v3',
                 title: 'Waiting for REST API',
                 views: '',

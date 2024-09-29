@@ -81,9 +81,9 @@ const settings = {
  * @param {Object} info The json object that contains the video info [read protocol.md]
  */
 function updateInfo(info: VideoMetadata) {
-    const thumbnail = info.video.thumbnail;
-    const title = info.video.title;
-    const creator = info.video.creator;
+    const thumbnail = info.data.thumbnail;
+    const title = info.data.title;
+    const creator = info.data.creator;
     const formattedTime = info.time.formattedTime;
     const timePercent = info.time.timePercent;
     updateTitle(title, creator);

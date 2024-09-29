@@ -110,7 +110,7 @@ webServer.get('/api/media/all',(req,res) => {
 });
 
 webServer.get('/api/media/video',(req,res) => {
-    res.send(store.info.video);
+    res.send(store.info.data);
 });
 
 webServer.get('/api/media/time',(req,res) => {

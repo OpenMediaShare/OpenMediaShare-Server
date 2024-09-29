@@ -24,8 +24,6 @@ console.clear = () => {
 }; //since console.clear() still doesn't work on windows :face_palm:
 
 
-
-
 function createWindow() {
     Mainwindow = new BrowserWindow({
         // width: 425,

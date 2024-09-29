@@ -18,11 +18,11 @@ export class AuthManager {
             if (client.uuid !== uuid) return;
             if (ip == '::1' || ip == '::ffff:127.0.0.1') ip = '127.0.0.1';
             client.ip = ip;
-            // if (client.clientInfo.title == videoMetadata.video.title) return;
+            // if (client.clientInfo.title == videoMetadata.data.title) return;
             client.clientInfo = {
-                'creator': videoMetadata.video.creator,
-                'title': videoMetadata.video.title,
-                'thumbnail': videoMetadata.video.thumbnail,
+                'creator': videoMetadata.data.creator,
+                'title': videoMetadata.data.title,
+                'thumbnail': videoMetadata.data.thumbnail,
                 'playerState': 'fucked'
             };
             if (Mainwindow) Mainwindow.webContents.send('clientUpdate', this.clients);
