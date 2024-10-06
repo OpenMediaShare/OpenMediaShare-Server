@@ -26,8 +26,6 @@ console.clear = () => {
 
 function createWindow() {
     Mainwindow = new BrowserWindow({
-        // width: 425,
-        // height: 280,
         resizable: true,
         webPreferences: {
             contextIsolation: true,

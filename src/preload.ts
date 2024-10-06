@@ -70,64 +70,6 @@ const settings = {
     }
 };
 
-// ipcRenderer.on('infoUpdate', (event, data) => {
-//     console.log(data);
-//     if (location.href.includes('index.html')) {
-//         updateInfo(data);
-//     }
-// });
-
-/**
- * @param {Object} info The json object that contains the video info [read protocol.md]
- */
-function updateInfo(info: VideoMetadata) {
-    const thumbnail = info.data.thumbnail;
-    const title = info.data.title;
-    const creator = info.data.creator;
-    const formattedTime = info.time.formattedTime;
-    const timePercent = info.time.timePercent;
-    updateTitle(title, creator);
-    updateImage(thumbnail);
-
-    updateProgressBar(formattedTime, timePercent);
-}
-
-function updateImage(image) {
-    const imageDOM = document.getElementById('video_image');
-    console.log(image);
-    //check if should use image
-    if (image == 'ytlogo') {
-        imageDOM.style.height = '35vw';
-        imageDOM.style.width = '35vw';
-        imageDOM.style.left = '2%';
-        imageDOM.style.backgroundImage = 'url(../app/YTlogo4.png)';
-    } else {
-        imageDOM.style.height = '35vw';
-        imageDOM.style.width = '35vw';
-        imageDOM.style.left = '1%';
-        imageDOM.style.backgroundImage = `url(${image})`;
-    }
-}
-
-function updateTitle(title: string, creator: string) {
-    const titleDOM = document.getElementById('video_name');
-    const titleLen = title.length;
-    const creatorDOM = document.getElementById('video_creator');
-    const creatorLen = creator.length; // 70 + 20
-
-    if (titleLen > 50) { title = title.slice(0,50); title += '. . .';}
-    if (creatorLen > 25) { creator = creator.slice(0,20); creator +='. . . '; }
-
-    titleDOM.innerText = title;
-    creatorDOM.innerText = creator;
-}
-
-function updateProgressBar(formattedTime: string, timePercent: number) {
-    const ProgressBar = document.getElementById('time_bar');
-    const ProgressText = document.getElementById('time');
-    ProgressBar.style.width = `${timePercent}%`;
-    ProgressText.innerText = formattedTime.toString();
-}
 
 
 

@@ -37,21 +37,6 @@ export function formattedErrorBuilder(request: string, errorCode: number): Recor
 }
 
 
-export function printTTY(info: VideoMetadata, useVideoThumbnail: boolean ){
-    // console.clear()
-    console.log('--------------------------Video Info --------------------------',);
-    useVideoThumbnail
-        ? console.log('Using Video Thumbnails')
-        : console.log('Not Using Video Thumbnails');
-    console.log(`${info.time.formattedTime} / ${info.time.formattedTime} | ${Math.round(info.time.timePercent,)}%`,);
-    console.log(`Video Title: ${info.video.title}`);
-    console.log(`Video Creator: ${info.video.creator}`);
-    console.log(`Video Views: ${info.video.views}`);
-    console.log(`Video Likes: ${info.video.likes}`);
-    console.log(`Video URL: ${info.video.url}`);
-    console.log(`Video Thumbnail: ${info.video.thumbnail}`);
-    console.log('---------------------------------------------------------------',);
-}
 
 export function PushError(title: string, body: string){
     // console.log(Notification.isSupported());

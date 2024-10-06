@@ -26,28 +26,43 @@ webServer.use((req, res, next) => {
 
 webServer.use((req, res, next) => {
     if (req.method !== 'POST') {next(); return;}
-    // authManager.clients.map(c => console.log(c));
-    // if(authManager.clients.map(c => c.uuid == req.body.auth.uuid)){
-    //     next();
-    //     return;
-    // }
-    for (let i=0;i<authManager.clients.length;i++){
-        if (authManager.clients[i].uuid == req.body.auth.uuid) {
-            next(); return;
-        }
+    let ip = req.ip;
+    if (ip == '::1' || ip == '::ffff:127.0.0.1') ip = '127.0.0.1';
+    req.body.auth.ip = ip;
+    next(); return;
+});
+
+webServer.use((req, res, next) => {
+    //WARNING DO NOT USE body.video IT IS DEPRECATED AND WILL BE REMOVED IN A LATER UPDATE!!! 
+    //Please switch to body.data that has all the same properties.
+
+    //fix old providers and apps that still use video instead of info 
+    if (req.body.video){ req.body.data = req.body.video; }
+    if (req.body.data){ req.body.video = req.body.data; }
+    next(); return;
+});
+
+
+webServer.use((req, res, next) => {
+    if (req.method !== 'POST') {next(); return;}
+    if (req.url == '/api/auth/openSession') {next(); return;}
+
+    //don't run rest of middleware if incoming uuid has a existing client.
+    if (authManager.clientExistByUUID(req.body.auth.uuid)) {
+        console.log('[RestAPI] [Debug] [Middleware] uuid exists as client, continue to next function without running middleware.');
+        next(); return;
     }
 
+    // Hot Reload!, add client without posting /openSession
     if(authManager.activeClient === null) {
+        console.log('[RestAPI] [Debug] [Middleware] No Active Client, using received without checking to see if client exists(this will most likely end up fucking me over later :skull:) ');
         authManager.addClient(req.body.auth);
     } else {
+        console.log('[RestAPI] [Debug] [Middleware] Active Client, add new client but don\'t make them active. ');
         const uuidList = authManager.clients.map(c => c.uuid);
         if (uuidList.includes(req.body.auth.uuid)){ next(); return;}
-
         authManager.addClientSilent(req.body.auth);
-
     }
-
-
     next();
     return;
 });
@@ -55,11 +70,12 @@ webServer.use((req, res, next) => {
 // Auth \\
 
 webServer.post('/api/auth/openSession',(req,res) => {
+    if (authManager.clientExistByUUID(req.body.auth.uuid)) {res.sendStatus(409); return;}
     authManager.addClient({
         uuid: req.body.auth.uuid,
-        name: 'unknown',
-        service: 'unknown',
-        ip: 'unknown'
+        name: req.body.auth.name ?? 'unknown',
+        service: req.body.auth.service ?? 'unknown',
+        ip: req.body.auth.ip // if this doesn't exist something has gone very wrong.
     });
     res.sendStatus(200);
 });
@@ -69,10 +85,6 @@ webServer.post('/api/auth/closeSession',(req,res) => {
     res.sendStatus(200);
 });
 
-// webServer.post('/api/update/test',(req,res) => {
-//     authManager.updateClient('432',4);
-//     res.sendStatus(200);
-// });
 
 webServer.delete('/api/auth/closeSession',(req,res) => {
     authManager.removeClientByUUID(req.body.auth.uuid);
@@ -101,7 +113,6 @@ webServer.post('/api/media/all',(req,res) => {
         return;
     }
     store.setAll(req.body);
-    
     res.sendStatus(200);
 });
 

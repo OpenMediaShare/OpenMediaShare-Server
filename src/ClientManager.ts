@@ -16,13 +16,12 @@ export class AuthManager {
         // console.log(this.clients.map(e => e.uuid == '432'));
         this.clients.forEach((client) => {
             if (client.uuid !== uuid) return;
-            if (ip == '::1' || ip == '::ffff:127.0.0.1') ip = '127.0.0.1';
             client.ip = ip;
-            // if (client.clientInfo.title == videoMetadata.data.title) return;
+            console.log(videoMetadata);
             client.clientInfo = {
-                'creator': videoMetadata.data.creator,
-                'title': videoMetadata.data.title,
-                'thumbnail': videoMetadata.data.thumbnail,
+                'creator': videoMetadata.data.creator ?? 'Undefined',
+                'title': videoMetadata.data.title ?? 'Undefined',
+                'thumbnail': videoMetadata.data.thumbnail ?? 'Undefined',
                 'playerState': 'fucked'
             };
             if (Mainwindow) Mainwindow.webContents.send('clientUpdate', this.clients);
@@ -31,6 +30,9 @@ export class AuthManager {
     }
 
     addClient(client: Client) {
+        console.log('client add:');
+        console.log(`    uuid:${client.uuid}`);
+        console.log(`    name:${client.name}`);
         this.clients.push(client);
         this.activeClient = client;
         if (!app.isReady()) return;
@@ -39,9 +41,11 @@ export class AuthManager {
             'body': client.uuid,
             'title': 'New Client',
         }).show();
+        if (Mainwindow) Mainwindow.webContents.send('clientUpdate', this.clients);
     }
 
     addClientSilent(client: Client) {
+        this.clients.forEach(loopClient => {if(loopClient.uuid == client.uuid) return;});
         this.clients.push(client);
         if (!app.isReady()) return;
         new Notification({
@@ -49,6 +53,7 @@ export class AuthManager {
             'body': client.uuid,
             'title': 'New Client (Silent)',
         }).show();
+        if (Mainwindow) Mainwindow.webContents.send('clientUpdate', this.clients);
     }
 
     removeClientByName(name: string) {
@@ -90,5 +95,13 @@ export class AuthManager {
             'title': 'New Active Client',
         }).show();
         
+    }
+
+    clientExistByUUID(uuid: string){
+        let exists = false;
+        for (let i=0;i<this.clients.length;i++){
+            if (this.clients[i].uuid == uuid) exists = true;
+        }
+        return exists;
     }
 }
