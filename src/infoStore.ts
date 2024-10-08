@@ -46,30 +46,12 @@ type LocalEventTypes = {
     infoUpdated: [
         info: VideoMetadata
     ],
+    playerStateChange: [PlayerState];
 }
 
+
 export class InfoStore extends TypedEventEmitter<LocalEventTypes>{
-    info: VideoMetadata = {
-        data: {
-            creator: 'WatchRPC v3',
-            title: 'Waiting for REST API',
-            views: '',
-            likes: '',
-            thumbnail: 'ytlogo',
-            url: 'https://waterwolf.net',
-        },
-        time: {
-            curruntTime: 0,
-            totalTime: 0,
-            timePercent: 0,
-            formattedTime: '',
-        },
-        auth: {
-            uuid: '',
-            name: '',
-            service: ''
-        },
-    };
+    info: VideoMetadata;
     constructor() {
         super();
     }
@@ -100,6 +82,10 @@ export class InfoStore extends TypedEventEmitter<LocalEventTypes>{
         this.emit('infoUpdated', this.info);
     }
 
+    updateState(state: PlayerState){
+        this.info.data.playerState = state;
+        this.emit('playerStateChange', state);
+    }
 
     // notMatchUUID(uuid) { //checks if the uuid provided matches the saved uuid, if it doesn't match it returns true
     //     if (this.info.auth.uuid !== uuid) return true;
@@ -123,6 +109,7 @@ export class InfoStore extends TypedEventEmitter<LocalEventTypes>{
                 likes: '',
                 thumbnail: 'ytlogo',
                 url: 'https://waterwolf.net/projects/watchrpc',
+                playerState: 'unknown'
             },
             time: {
                 curruntTime: 0,
@@ -135,6 +122,7 @@ export class InfoStore extends TypedEventEmitter<LocalEventTypes>{
                 name: undefined,
                 service: ''
             },
+
         };
     }
 }

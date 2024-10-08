@@ -4,6 +4,7 @@ import { app, Notification } from 'electron';
 import { Mainwindow } from './main';
 
 
+
 export class AuthManager {
     clients: Client[];
     activeClient: Client | {uuid: string};
@@ -12,22 +13,32 @@ export class AuthManager {
         this.activeClient = null;
     }
 
-    updateClient(uuid, videoMetadata: VideoMetadata, ip) {
+    updateClient(uuid, metadata: VideoMetadata, ip) {
         // console.log(this.clients.map(e => e.uuid == '432'));
         this.clients.forEach((client) => {
             if (client.uuid !== uuid) return;
             client.ip = ip;
-            console.log(videoMetadata);
+            console.log(metadata);
             client.clientInfo = {
-                'creator': videoMetadata.data.creator ?? 'Undefined',
-                'title': videoMetadata.data.title ?? 'Undefined',
-                'thumbnail': videoMetadata.data.thumbnail ?? 'Undefined',
-                'playerState': 'fucked'
+                'creator': metadata.data.creator ?? client.clientInfo.creator,
+                'title': metadata.data.title ?? client.clientInfo.title,
+                'thumbnail': metadata.data.thumbnail ?? client.clientInfo.thumbnail,
+                'playerState': client.clientInfo.playerState ?? 'unknown'
             };
             if (Mainwindow) Mainwindow.webContents.send('clientUpdate', this.clients);
             
         });
     }
+    updateClientState(uuid,state: PlayerState) {
+        // console.log(this.clients.map(e => e.uuid == '432'));
+        this.clients.forEach((client) => {
+            if (client.uuid !== uuid) return;
+            client.clientInfo.playerState = state ?? 'unknown';
+            if (Mainwindow) Mainwindow.webContents.send('clientUpdate', this.clients);
+            
+        });
+    }
+    
 
     addClient(client: Client) {
         console.log('client add:');

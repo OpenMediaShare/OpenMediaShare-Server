@@ -1,5 +1,3 @@
-
-
 :root {
     /*   color variables */
     --clr-primary: #0e48fe;
@@ -11,15 +9,14 @@
     --videoName-text-weight: 800;
     --videocreator-text-weight: 100;
     --timeBar-back-graident: linear-gradient(to top, grey, lightgrey);
-    --timeBar-graident: linear-gradient(
-        to left,
-        rgb(181, 38, 150),
-        rgb(47, 123, 193)
-    );
+    --timeBar-graident: linear-gradient(to left,
+            rgb(181, 38, 150),
+            rgb(47, 123, 193));
     --timeBar-color-backup: rgb(0, 153, 255);
 }
 
-html, body {
+html,
+body {
     margin: 0;
     padding: 0;
     height: 100%;
@@ -51,7 +48,7 @@ body {
 }
 
 
-.sidebar-item{
+.sidebar-item {
     display: flex;
     width: 100%;
     justify-content: center;
@@ -62,15 +59,15 @@ body {
 }
 
 
-.sidebar-item:hover{
+.sidebar-item:hover {
     background: #1a1b27;
 }
 
-.sidebar-item-active{
+.sidebar-item-active {
     background: #3b2257;
 }
 
-.sidebar-item-active:hover{
+.sidebar-item-active:hover {
     background: #3b2257;
 }
 
@@ -96,7 +93,7 @@ body {
     justify-content: center;
 }
 
-.home-page > table {
+.home-page>table {
     width: 100%;
 }
 
@@ -139,4 +136,103 @@ td {
     .home-page-table-uuid {
         display: none;
     }
+}
+
+
+.hidden {
+    display: none;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    padding: 10px;
+}
+
+.plugin {
+    background: #22222f;
+    backdrop-filter: blur(5px);
+
+    margin: 0px 10px 10px 10px;
+    /* max-width: 48%; */
+}
+
+.plugin-image {
+    width: 100%;
+    height: 200px;
+    background: rgba(107, 107, 107, 0.189);
+}
+
+.plugin-title {
+    font-size: 20px;
+    display: flex;
+    /* align-items: center; */
+
+}
+
+
+.plugin-topbar {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-evenly;
+    background: #16161e;
+    min-height: 60px;
+}
+
+
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 17px;
+    margin: 4px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* The slider */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 1rem;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 13px;
+    width: 13px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: #2196F3;
+}
+
+input:focus+.slider {
+    box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked+.slider:before {
+
+    transform: translateX(14px);
 }
