@@ -5,7 +5,7 @@ const path = require('path');
 module.exports = {
     packagerConfig: {
         'icon': './build/YTlogo4.ico',
-        'name': 'WatchRPC'
+        'name': 'OpenMediaShare'
     },
     rebuildConfig: {},
     makers: [
@@ -23,11 +23,11 @@ module.exports = {
         },
         {
             name: '@electron-forge/maker-deb',
-            platforms: ['linux','win32']
+            platforms: ['linux']
         },
         {
             name: '@electron-forge/maker-rpm',
-            platforms: ['linux','win32']
+            platforms: ['linux']
         },
     ],
 };

@@ -1,15 +1,22 @@
 import express from 'express';
 import http from 'http';
 import bodyParser = require('body-parser');
-import { formattedErrorBuilder } from './utils';
-import { authManager, configStore,store } from './main';
+
+import { authManager, store } from './main';
 import { WebSocketServer } from 'ws';
 import cors from 'cors';
-import { InfoStore } from './infoStore';
+
+function boardcastToWSClients(json: object){
+    wss.clients.forEach(client => {
+        client.send(JSON.stringify(json));
+    });
+}
 
 export const webServer = express();
 const server = new http.Server(webServer);
-const wss = new WebSocketServer({ server });
+const wss = new WebSocketServer({ noServer:true });
+
+
 
 
 webServer.use(cors({origin: '*'}));
@@ -53,7 +60,7 @@ webServer.use((req, res, next) => {
         console.log('[RestAPI] [Debug] [Middleware] uuid exists as client, continue to next function without running middleware.');
         next(); return;
     }
-
+    
     // Hot Reload!, add client without posting /openSession
     if(authManager.activeClient === null) {
         console.log('[RestAPI] [Debug] [Middleware] No Active Client, using received without checking to see if client exists(this will most likely end up fucking me over later :skull:) ');
@@ -76,7 +83,8 @@ webServer.post('/api/auth/openSession',(req,res) => {
         uuid: req.body.auth.uuid,
         name: req.body.auth.name ?? 'unknown',
         service: req.body.auth.service ?? 'unknown',
-        ip: req.body.auth.ip // if this doesn't exist something has gone very wrong.
+        ip: req.body.auth.ip, // if this doesn't exist something has gone very wrong.
+
     });
     res.sendStatus(200);
 });
@@ -102,6 +110,7 @@ webServer.post('/api/auth/main',(req,res) => {
 webServer.get('/api/auth/main',(req,res) => {
     res.send({active: authManager.activeClient, all: authManager.clients});
 });
+
 
 
 // Media Data \\
@@ -131,28 +140,53 @@ webServer.get('/api/media/time',(req,res) => {
 
 
 // Controls 
-webServer.get('/api/controls',(req,res) => {
-    res.send(store.info.time);
+webServer.get('/api/controls/:uuid/',(req,res) => {
+    //add support for diffrent clients 
+    if (store.info.auth == undefined) {res.sendStatus(200); return;}
+    if (store.info.auth.uuid == undefined) {res.sendStatus(200); return;}
+    if (req.params.uuid !== store.info.auth.uuid) {res.sendStatus(200); return;}
+    res.send(store.info.requests);
+    store.info.requests = {};
 });
 
-webServer.post('/api/controls/play',(req,res) => {
+webServer.put('/api/controls/play',(req,res) => {
+    store.info.requests = {play: true};
     res.sendStatus(200);
+    boardcastToWSClients({event: 'playEvent',play: true});
 });
 
-webServer.post('/api/controls/pause',(req,res) => {
+webServer.put('/api/controls/pause',(req,res) => {
+    store.info.requests = {pause: true};
     res.sendStatus(200);
+    boardcastToWSClients({event: 'pauseEvent',pause: true});
 });
 
-webServer.post('/api/controls/volume',(req,res) => {
+webServer.put('/api/controls/volume/:volume',(req,res) => {
+    store.info.requests = {volume: parseFloat(req.params.volume)};
     res.sendStatus(200);
+    boardcastToWSClients({event: 'volume',volume: parseFloat(req.params.volume)});
 });
 
-webServer.post('/api/controls/rewind',(req,res) => {
+webServer.put('/api/controls/rewind',(req,res) => {
+    store.info.requests = {rewind: true};
     res.sendStatus(200);
+    boardcastToWSClients({event: 'rewindEvent',rewind: true});
 });
 
-webServer.post('/api/controls/skip',(req,res) => {
+webServer.put('/api/controls/skip',(req,res) => {
+    store.info.requests = {skip: true};
     res.sendStatus(200);
+    boardcastToWSClients({event: 'skipEvent',skip: true});
+});
+
+webServer.put('/api/controls/seek/percent/:percentFloat/',(req,res) => {
+    const float = parseFloat(req.params.percentFloat) ?? 0.0;
+    const seconds = float * store.info.time.totalTime;
+
+    // store.info.requests.seek
+    store.info.requests = {seek: seconds};
+    res.sendStatus(200);
+    boardcastToWSClients({event: 'seekEvent',seek: seconds});
 });
 
 webServer.post('/api/controls/status',(req,res) => {
@@ -166,6 +200,18 @@ webServer.get('/api/controls/status',(req,res) => {
 });
 
 
+
+server.on('upgrade',(req,socket,head) => {
+    wss.handleUpgrade(req,socket,head,(sock) => {
+        // store.on('playerStateChange',(state) => {
+        //     sock.send(JSON.stringify({event: 'stateUpdate',body: state}));
+        // });
+        // store.on('infoUpdated',(info) => {
+        //     sock.send(JSON.stringify({event: 'allUpdate',body: info}));
+        // });
+        sock.send(JSON.stringify({event: 'Connected'}));
+    });
+});
 
 export async function restSetup(){
     return new Promise((res,rej) => {

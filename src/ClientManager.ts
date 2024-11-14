@@ -18,12 +18,11 @@ export class AuthManager {
         this.clients.forEach((client) => {
             if (client.uuid !== uuid) return;
             client.ip = ip;
-            console.log(metadata);
             client.clientInfo = {
                 'creator': metadata.data.creator ?? client.clientInfo.creator,
                 'title': metadata.data.title ?? client.clientInfo.title,
                 'thumbnail': metadata.data.thumbnail ?? client.clientInfo.thumbnail,
-                'playerState': client.clientInfo.playerState ?? 'unknown'
+                'playerState': metadata.data.playerState ?? client.clientInfo.playerState ?? 'unknown'
             };
             if (Mainwindow) Mainwindow.webContents.send('clientUpdate', this.clients);
             
@@ -65,6 +64,14 @@ export class AuthManager {
             'title': 'New Client (Silent)',
         }).show();
         if (Mainwindow) Mainwindow.webContents.send('clientUpdate', this.clients);
+    }
+
+    getClientByUUID(uuid: string): Client{
+        let client;
+        for (let i=0;i<this.clients.length;i++){
+            if (this.clients[i].uuid == uuid) client = this.clients[i];
+        }
+        return client;
     }
 
     removeClientByName(name: string) {

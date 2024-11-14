@@ -26,7 +26,7 @@ export class PluginManager {
             express: webServer
         };
         for(const file of files) {
-            if (!file.isFile() || !file.name.endsWith('js')) return;
+            if (!file.isFile() || !file.name.endsWith('js')) continue;
             console.log(`Importing Plugin: ${file.name}`);
             const plugin: FSPlugin = await import(path.join(this.pluginDir,file.name)); 
             console.log(`Starting Plugin: ${file.name}`);

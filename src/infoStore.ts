@@ -51,7 +51,27 @@ type LocalEventTypes = {
 
 
 export class InfoStore extends TypedEventEmitter<LocalEventTypes>{
-    info: VideoMetadata;
+    info: VideoMetadata = {
+        data: {
+            creator: '',
+            title: '',
+            views: '',
+            likes: '',
+            thumbnail: '',
+            url: '',
+            color: undefined,
+            lyrics: [],
+            playerState: 'playing'
+        },
+        time: {
+            curruntTime: 0,
+            totalTime: 0,
+            timePercent: 0,
+            formattedTime: ''
+        },
+        auth: undefined,
+        requests: {}
+    };
     constructor() {
         super();
     }
@@ -122,7 +142,7 @@ export class InfoStore extends TypedEventEmitter<LocalEventTypes>{
                 name: undefined,
                 service: ''
             },
-
+            requests: {}
         };
     }
 }
