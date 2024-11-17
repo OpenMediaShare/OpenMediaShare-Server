@@ -5,9 +5,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.js"
-        integrity="sha512-9mpsATI0KClwt+xVZfbcf2lJ8IFBAwsubJ6mI3rtULwyM3fBmQFzj0It4tGqxLOGQwGfJdk/G+fANnxfq9/cew=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300&display=swap" rel="stylesheet" />
@@ -21,28 +19,34 @@
 
     <div id="sidebyside">
         <div id="sidebar">
-            <div class="sidebar-item sidebar-item-active">
+            <div id="home-item" class="sidebar-item sidebar-item-active">
                 <span class="material-symbols-outlined sidebar-item-icon">
                     home
                 </span>
                 Home
             </div>
-            <div class="sidebar-item">
+            <div id="plugins-item" class="sidebar-item">
                 <span class="material-symbols-outlined sidebar-item-icon">
                     extension
                 </span>
                 Plugins
             </div>
-            <div class="sidebar-item">
+            <div id="settings-item" class="sidebar-item">
                 <span class="material-symbols-outlined sidebar-item-icon">
                     settings
                 </span>
                 Settings
             </div>
+            <div id="debug-item" class="sidebar-item hidden">
+                <span class="material-symbols-outlined sidebar-item-icon">
+                    bug_report
+                </span>
+                Debug
+            </div>
         </div>
     
         <div id="main" >
-            <div class="master-page home-page active-page">
+            <div id="home-page" class="master-page active-page">
                 <table id="clients-table">
                     
                     <tr>
@@ -67,8 +71,9 @@
                 </table>
             </div>
 
-            <div class="master-page plugins-page active-page hidden">
-                <div class="grid-container">
+            <div id="plugins-page" class="master-page plugins-page">
+                <h1>Work In Progress</h1>
+                <div class="grid-container hidden">
                     <div class="plugin">
                         <div class="plugin-details">
                             <div class="plugin-topbar">
@@ -124,7 +129,18 @@
                         </div>
                     </div>  
                 </div>
-                
+            </div>
+            <div id="settings-page" class="master-page plugins-page">
+                <div class="grid-container">
+
+                </div>
+            </div>
+            <div id="debug-page" class="master-page plugins-page">
+                <div>
+                    <span>Debug 1</span>
+                    <span>Debug 2</span>
+                    <span>Debug 3</span>
+                </div>
             </div>
         </div>
     </div>
@@ -132,6 +148,6 @@
 
 </body>
 <script src="../dist/renderer.js"></script>
-<script src="../dist/themeManager.js"></script>
+
 
 </html>

@@ -7,14 +7,13 @@ import { store } from './main';
 import { webServer } from './restServ';
 
 
-
-
-
 export class PluginManager {
     pluginDir: any;
+    plugins: FSPlugin[];
     constructor(){
         this.pluginDir = path.join(homedir(),'.openMediaShare','plugins');
         if(!existsSync(this.pluginDir)) { mkdirSync(this.pluginDir,{ recursive: true }); }
+        this.plugins = [];
     }
 
     async startPlugins(){
@@ -32,10 +31,16 @@ export class PluginManager {
             console.log(`Starting Plugin: ${file.name}`);
             const pluginConfigHelper = new PluginConfigHelper(plugin);
             plugin.start(modules,pluginConfigHelper);
+            this.plugins.push(plugin);
             //check to see if infoupdate exists before calling it
             if (plugin.infoUpdate instanceof Function){
                 store.on('infoUpdated',(metadata) => {
                     plugin.infoUpdate(modules,metadata,pluginConfigHelper);
+                });
+            }
+            if (plugin.stateUpdate instanceof Function){
+                store.on('playerStateChange',(playerState) => {
+                    plugin.stateUpdate(modules,playerState,pluginConfigHelper);
                 });
             }
             console.log(`Started Plugin: ${plugin.info.name}`);
@@ -46,14 +51,21 @@ export class PluginManager {
 
 
     async stopPlugins(){
-        const files = readdirSync(this.pluginDir,{ withFileTypes: true });
-        for(const file of files) {
-            if (!file.isFile() || !file.name.endsWith('js')) return;
-            console.log(`Starting Plugin: ${file.name}`);
-            const plugin = await import(path.join(this.pluginDir,file.name));
+        // const files = readdirSync(this.pluginDir,{ withFileTypes: true });
+        // for(const file of files) {
+        //     if (!file.isFile() || !file.name.endsWith('js')) return;
+        //     console.log(`Starting Plugin: ${file.name}`);
+        //     const plugin = await import(path.join(this.pluginDir,file.name));
+        //     plugin.stop();
+        //     console.log(`Started Plugin: ${plugin.info.name}`);
+        // }
+
+        // why were we creating a new plugin before calling stop, this wasn't doing anything for the running plugin wtf
+        this.plugins.forEach(plugin => {
+            console.log(`Stopping Plugin: ${plugin.info.name}`);
             plugin.stop();
-            console.log(`Started Plugin: ${plugin.info.name}`);
-        }
+            console.log(`Stopped Plugin: ${plugin.info.name}`);
+        });
     }
 
 }

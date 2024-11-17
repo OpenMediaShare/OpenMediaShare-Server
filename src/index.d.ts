@@ -40,6 +40,7 @@ declare global {
         start: (PluginModules, pluginConfigHelper) => void,
         stop: () => void,
         infoUpdate: (PluginModules, VideoMetadata, pluginConfigHelper) => void,
+        stateUpdate: (PluginModules, PlayerState, pluginConfigHelper) => void
         info: {
             name: string,
             auther: string,

@@ -32,15 +32,18 @@ function createWindow() {
             preload: path.join(__dirname, 'preload.js'),
         },
         frame: true,
+        autoHideMenuBar: true,
+        backgroundMaterial: 'none',
+        // transparent: true,
         icon: path.join(__dirname, '../build', 'YTlogo4.png'),
 
     });
     Mainwindow.loadFile(path.join(__dirname, '../app/index.html'));
     if (!tray) { positron.createBasicTray(tray, Mainwindow); }
-    Mainwindow.webContents.once('dom-ready', () => {
-        Mainwindow.setBackgroundColor('#000000ff');
-        Mainwindow.setBackgroundMaterial('acrylic');
-    });
+    // Mainwindow.webContents.once('dom-ready', () => {
+    //     Mainwindow.setBackgroundColor('#000000ff');
+    //     Mainwindow.setBackgroundMaterial('acrylic');
+    // });
 
     Mainwindow.on('close', (e) => {
         WindowCloseState ? console.log() : e.preventDefault();
@@ -56,23 +59,7 @@ function createWindow() {
     });
 }
 
-function createWindow2() {
-    Settingswindow = new BrowserWindow({
-        width: 600,
-        height: 600,
-        resizable: true,
-        webPreferences: {
-            contextIsolation: true,
-            preload: path.join(__dirname, 'preload.js'),
-        },
-        frame: true,
-        backgroundMaterial: 'tabbed',
-        autoHideMenuBar: true,
-        transparent: true
-    });
-    Settingswindow.loadFile(path.join(__dirname, '../app/settings.html'));
-    Settingswindow.setBackgroundMaterial('tabbed');
-}
+
 
 ipcMain.handle('setTheme', (_event, arg) => {
     configStore.set('theme', arg);
@@ -88,11 +75,7 @@ ipcMain.handle('winControls', (_event, arg) => {
 });
 
 
-ipcMain.handle('settings', () => {
-    console.log(configStore.getFull());
-    console.log('[ipcMain] [settings] > settings');
-    createWindow2();
-});
+
 
 ipcMain.handle('setOptions', (_event, args) => {
     if (configStore.get('mode') !== args.service) {
@@ -121,6 +104,7 @@ app.whenReady().then(() => {
     });
     console.log('Starting Plugins');
     pluginManager.startPlugins();
+
 });
 
 
