@@ -16,6 +16,10 @@ contextBridge.exposeInMainWorld('settings', {
     status: (arg) => ipcRenderer.invoke('setOptions', arg),
     getStatus: () => ipcRenderer.invoke('getOptions'),
     forceRefresh: () => ipcRenderer.invoke('forceRefresh'),
+
+    
+    get: (key) => ipcRenderer.invoke('getConfigKey',key),
+    set: (key,value) => ipcRenderer.invoke('setConfigKey',key,value),
 });
 
 contextBridge.exposeInMainWorld('theme', {
@@ -46,7 +50,7 @@ ipcRenderer.on('clientUpdate', (event, data: Client[]) => {
 <td class="home-page-table-status">
     <div class="home-page-table-image-center">
         <span class="material-symbols-outlined home-page-table-status-icon">
-            play_arrow
+            ${getStateIcon(client.clientInfo.playerState)}
         </span>
     </div>
 </td>
@@ -61,14 +65,20 @@ ipcRenderer.on('clientUpdate', (event, data: Client[]) => {
     });
 });
 
-const settings = {
-    'pageName': {
-        title: 'Something :3',
-        elements: [
-            {'type': 'checkbox', 'id': 'update_led','label': 'Update LED\'s'}
-        ]
+
+function getStateIcon(playerState: PlayerState){
+    switch (playerState) {
+    case 'playing':
+        return 'play_arrow';
+        break;
+    case 'paused':
+        return 'pause';
+        break;
+    case 'unknown':
+        return 'question_mark';
+        break;
     }
-};
+}
 
 
 

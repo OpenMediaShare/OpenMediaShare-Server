@@ -53,21 +53,25 @@ Array.from(buttons).forEach(el => {
 });
 
 
-const testSettings = [
-
+const configSettings = [
     {
         type: 'boolean',
         key: 'debug',
-        value: true,
-
-        title: 'Enable Debugging',
+        title: 'Enable Debugging Logs',
         desc: 'Enables debug messages in the terminal and enables the debug ui on port 4949'
+    },
+    {
+        type: 'boolean',
+        key: 'debugNotification',
+        title: 'Enable Debugging Notification',
+        desc: 'Enables debug desktop notifications.'
     }
 ];
 
 
 const settingsPage = document.querySelector('#settings-page .grid-container');
-testSettings.forEach(setting => {
+configSettings.forEach(async (setting) => {
+    const checked = await window.settings.get(setting.key);
     const el = document.createElement('div');
     el.id = setting.key;
     el.classList.add('plugin','settings-item');
@@ -79,7 +83,7 @@ testSettings.forEach(setting => {
                         ${setting.title ?? setting.key}
                     </span>
                     <label class="switch">
-                        <input type="checkbox">
+                        <input id="${setting.key}-checkbox" type="checkbox" ${checked ? 'checked' : ''}>
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -90,6 +94,10 @@ testSettings.forEach(setting => {
     
     el.innerHTML = booleanHtml;
     settingsPage.appendChild(el);
+    document.getElementById(`${setting.key}-checkbox`).addEventListener('click',(e) => {
+        window.settings.set(setting.key,e.target.checked);
+        console.log(`${setting.key}:${e.target.checked}`);
+    });
 });
 
 

@@ -2,9 +2,10 @@ import express from 'express';
 import http from 'http';
 import bodyParser = require('body-parser');
 
-import { authManager, store } from './main';
+import { authManager, configStore, store } from './main';
 import { WebSocketServer } from 'ws';
 import cors from 'cors';
+import { Logger } from './logger';
 
 function boardcastToWSClients(json: object){
     wss.clients.forEach(client => {
@@ -13,23 +14,28 @@ function boardcastToWSClients(json: object){
 }
 
 export const webServer = express();
+
 const server = new http.Server(webServer);
 const wss = new WebSocketServer({ noServer:true });
-
+const logger = new Logger();
 
 
 
 webServer.use(cors({origin: '*'}));
 webServer.use(bodyParser.json());
 webServer.use((req, res, next) => {
-    console.log(`[RestAPI] [Debug] [${req.method}]: ${req.url}`);
-    // console.log(req.body);
+    logger.dinfo(['WebServ','Middleware',req.method],`${req.url}`);
+    // console.log(`[RestAPI] [Debug] [${req.method}]: ${req.url}`);
+    if(configStore.get('debug')){
+        console.log(req.body);
+    }
+    
     // console.log(`    ${JSON.stringify(req.body)}`);
     if (req.method !== 'POST') {next(); return;}
     if (req.body.auth !== undefined && req.body.auth.uuid !== undefined) {next(); return;}
     res.sendStatus(400);
-    console.log('[RestAPI] [Warn]: Caught packet without UUID, ignoring.');
-    
+    logger.dwarn(['WebServ','Middleware'],'Caught packet without UUID, ignoring.');
+
 });
 
 webServer.use((req, res, next) => {
@@ -57,16 +63,17 @@ webServer.use((req, res, next) => {
 
     //don't run rest of middleware if incoming uuid has a existing client.
     if (authManager.clientExistByUUID(req.body.auth.uuid)) {
-        console.log('[RestAPI] [Debug] [Middleware] uuid exists as client, continue to next function without running middleware.');
+        logger.dinfo(['WebServ','Middleware'],'uuid exists as client, continue to next function without running middleware.');
         next(); return;
     }
     
     // Hot Reload!, add client without posting /openSession
     if(authManager.activeClient === null) {
-        console.log('[RestAPI] [Debug] [Middleware] No Active Client, using received without checking to see if client exists(this will most likely end up fucking me over later :skull:) ');
+        logger.dinfo(['WebServ','Middleware'],'No Active Client, using received without checking to see if client exists(this will most likely end up fucking me over later :skull:) ');
         authManager.addClient(req.body.auth);
     } else {
-        console.log('[RestAPI] [Debug] [Middleware] Active Client, add new client but don\'t make them active. ');
+        logger.dinfo(['WebServ','Middleware'],'Active Client, add new client but don\'t make them active.');
+
         const uuidList = authManager.clients.map(c => c.uuid);
         if (uuidList.includes(req.body.auth.uuid)){ next(); return;}
         authManager.addClientSilent(req.body.auth);
@@ -116,7 +123,8 @@ webServer.get('/api/auth/main',(req,res) => {
 // Media Data \\
 
 webServer.post('/api/media/all',(req,res) => {
-    console.log(`[RestAPI] [Debug] uuid compare: ${req.body.auth.uuid} =!= ${authManager.activeClient.uuid}`);
+    logger.dinfo(['WebServ','Middleware','UUID-Compare'],`${req.body.auth.uuid} =!= ${authManager.activeClient.uuid}`);
+
     authManager.updateClient(req.body.auth.uuid,req.body,req.ip);
     if(req.body.auth.uuid !== authManager.activeClient.uuid) {
         res.sendStatus(200);
@@ -190,7 +198,7 @@ webServer.put('/api/controls/seek/percent/:percentFloat/',(req,res) => {
 });
 
 webServer.post('/api/controls/status',(req,res) => {
-    authManager.updateClientState(req.body.auth.uuid,req.body.data.state);
+    authManager.updateClientState(req.body.auth.uuid,req.body.data.playerState);
     store.updateState(req.body.data.state );
     res.sendStatus(200);
 });

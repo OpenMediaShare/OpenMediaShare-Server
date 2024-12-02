@@ -5,8 +5,9 @@ import path from 'path';
 
 import { store } from './main';
 import { webServer } from './restServ';
+import { Logger } from './logger';
 
-
+const logger = new Logger();
 export class PluginManager {
     pluginDir: any;
     plugins: FSPlugin[];
@@ -17,6 +18,7 @@ export class PluginManager {
     }
 
     async startPlugins(){
+        let consoleLogDetect = true;
         const files = readdirSync(this.pluginDir,{ withFileTypes: true });
         const electronImport = await import('electron');
         const modules = {
@@ -26,9 +28,19 @@ export class PluginManager {
         };
         for(const file of files) {
             if (!file.isFile() || !file.name.endsWith('js')) continue;
-            console.log(`Importing Plugin: ${file.name}`);
+            logger.info(['Plugin Manager'],`Importing Plugin: ${file.name}`);
             const plugin: FSPlugin = await import(path.join(this.pluginDir,file.name)); 
-            console.log(`Starting Plugin: ${file.name}`);
+            logger.info(['Plugin Manager'],`Starting Plugin: ${plugin.info.name}`);
+            const oldLog = console.log;
+            console.log = (e) => {
+                if (consoleLogDetect) {
+                    oldLog(`This plugin is using console.log, Please ask ${plugin.info.auther} to consider switching to the plugin logger instead.`);
+                }
+                consoleLogDetect = false;
+                console.log = oldLog;
+                logger.info(['Legacy Plugin',plugin.info.name],e);
+                // oldLog(e);
+            };
             const pluginConfigHelper = new PluginConfigHelper(plugin);
             plugin.start(modules,pluginConfigHelper);
             this.plugins.push(plugin);
@@ -43,7 +55,7 @@ export class PluginManager {
                     plugin.stateUpdate(modules,playerState,pluginConfigHelper);
                 });
             }
-            console.log(`Started Plugin: ${plugin.info.name}`);
+            logger.info(['Plugin Manager'],`Started Plugin: ${plugin.info.name}`);
         }
     }
 
@@ -62,9 +74,10 @@ export class PluginManager {
 
         // why were we creating a new plugin before calling stop, this wasn't doing anything for the running plugin wtf
         this.plugins.forEach(plugin => {
-            console.log(`Stopping Plugin: ${plugin.info.name}`);
+            logger.info(['Plugin Manager'],`Stopping Plugin: ${plugin.info.name}`);
             plugin.stop();
-            console.log(`Stopped Plugin: ${plugin.info.name}`);
+            logger.info(['Plugin Manager'],`Stopped Plugin: ${plugin.info.name}`);
+
         });
     }
 

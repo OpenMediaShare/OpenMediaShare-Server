@@ -8,15 +8,18 @@ import { restSetup } from './restServ';
 import { networkInterfaces } from 'os';
 import { PluginManager } from './pluginManager';
 import { AuthManager } from './ClientManager';
+import { Logger } from './logger';
 export const store = new InfoStore();
 export const configStore = new ConfigHelper(path.join(__dirname, '../config.json'));
-const pluginManager = new PluginManager();
 export const authManager = new AuthManager();
 
-export let Mainwindow: BrowserWindow;
-let Settingswindow;
-let WindowCloseState = false;
+const pluginManager = new PluginManager();
 const tray: Tray = null;
+const logger = new Logger();
+
+export let Mainwindow: BrowserWindow;
+let WindowCloseState = false;
+
 
 
 console.clear = () => {
@@ -33,23 +36,21 @@ function createWindow() {
         },
         frame: true,
         autoHideMenuBar: true,
-        backgroundMaterial: 'none',
+        backgroundMaterial: 'acrylic',
         // transparent: true,
         icon: path.join(__dirname, '../build', 'YTlogo4.png'),
 
     });
     Mainwindow.loadFile(path.join(__dirname, '../app/index.html'));
     if (!tray) { positron.createBasicTray(tray, Mainwindow); }
-    // Mainwindow.webContents.once('dom-ready', () => {
-    //     Mainwindow.setBackgroundColor('#000000ff');
-    //     Mainwindow.setBackgroundMaterial('acrylic');
-    // });
 
     Mainwindow.on('close', (e) => {
         WindowCloseState ? console.log() : e.preventDefault();
         dialog.showMessageBox(positron.closedialogSettings).then(async (result) => {
+            // logger.derror([''],result.checkboxChecked.toString());
             if (result.response) {
                 WindowCloseState = true;
+                logger.info(['Main'],'Shutting Down...');
                 await pluginManager.stopPlugins();
                 app.quit();
             } else {
@@ -61,48 +62,28 @@ function createWindow() {
 
 
 
-ipcMain.handle('setTheme', (_event, arg) => {
-    configStore.set('theme', arg);
-});
-
-ipcMain.handle('getTheme', () => {
-    return configStore.get('theme');
-});
-
-
-ipcMain.handle('winControls', (_event, arg) => {
-    positron.handleWinControls(arg);
-});
-
-
-
-
-ipcMain.handle('setOptions', (_event, args) => {
-    if (configStore.get('mode') !== args.service) {
-        store.blank();
-    }
-    configStore.set('mode', args.service);
-    configStore.set('showTTY', args.showTTy);
-    configStore.set('errNote', args.errNote);
-    configStore.set('RPCServer', args.RPCServer);
-});
-
-ipcMain.handle('getOptions', () => {
-    return configStore.getFull();
-});
 
 ipcMain.handle('forceRefresh', () => {
     Mainwindow.reload();
+});
+
+ipcMain.handle('getConfigKey',(_event, key) => {
+    return configStore.get(key);
+});
+
+ipcMain.handle('setConfigKey',(_event, key,value) => {
+    logger.info(['Main','Settings'],`Set Option "${key}" to "${value}"`);
+    return configStore.set(key,value);
 });
 
 
 app.whenReady().then(() => {
     createWindow();
     store.on('infoUpdated', () => {
-        console.log('[InfoStore] [Debug] Info Update');
+        logger.dinfo(['InfoStore'],'Info Update');
         Mainwindow.webContents.send('infoUpdate', store.info);
     });
-    console.log('Starting Plugins');
+    logger.info(['Plugin Manager'],'Starting Plugins');
     pluginManager.startPlugins();
 
 });
@@ -110,7 +91,7 @@ app.whenReady().then(() => {
 
 restSetup()
     .then(() => {
-        console.log('[restServ] Server listening on port 9494');
+        logger.info(['restServ'],'Server listening on port 9494');
         const interfaces = networkInterfaces();
         Object.entries(interfaces).forEach(item => {
             item[1].forEach(info => {
@@ -121,7 +102,9 @@ restSetup()
     })
     .catch(err => {
         console.error(err);
+        process.exit();
         throw new Error('Failed to create web server');
+        
     });
 
 

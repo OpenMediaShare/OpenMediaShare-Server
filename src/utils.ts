@@ -3,12 +3,6 @@ import { readFileSync, writeFileSync } from 'fs';
 import { Notification } from 'electron';
 import path from 'path';
 
-const errorCodes = [
-    'reserved',
-    'VideoData is missing',
-    'VideoData call failed',
-    'Platform is not selected',
-];
 
 export function formattedTimeBuilder(currentSeconds: number, totalSeconds: number): string {
     const cmins = Math.floor(currentSeconds / 60);
@@ -23,18 +17,6 @@ export function formattedTimeBuilder(currentSeconds: number, totalSeconds: numbe
 }
 
 
-export function formattedErrorBuilder(request: string, errorCode: number): Record<string, unknown> {
-    const response: Record<string, unknown> = {
-        request: request,
-    };
-    if (errorCode) {
-        response.error = {
-            code: errorCode,
-            what: errorCodes[errorCode],
-        };
-    }
-    return response;
-}
 
 
 
@@ -58,23 +40,34 @@ export class ConfigHelper {
     }
 
     get(key: string): unknown {
-        if (this.getFull()[key] !== null) {
-            return this.getFull()[key];
-        } else {
-            return 'ERROR';
+        if (this.getFull()[key] == null) {
+            this.set(key,null) ;
         }
+        return this.getFull()[key];
+        // if (this.getFull()[key] !== null) {
+        //     return this.getFull()[key];
+        // } else {
+        //     return null;
+        // }
     }
     set(key: string, value: unknown): string {
-        if (this.getFull()[key] !== null) {
-            const full = this.getFull();
-            full[key] = value;
-            writeFileSync(
-                path.join(this.configFile),
-                JSON.stringify(full, null, 4),
-            );
-            return;
-        } else {
-            return 'ERROR';
-        }
+        const full = this.getFull();
+        full[key] = value;
+        writeFileSync(
+            path.join(this.configFile),
+            JSON.stringify(full, null, 4),
+        );
+        return;
+        // if (this.getFull()[key] !== null) {
+        //     const full = this.getFull();
+        //     full[key] = value;
+        //     writeFileSync(
+        //         path.join(this.configFile),
+        //         JSON.stringify(full, null, 4),
+        //     );
+        //     return;
+        // } else {
+        //     return 'ERROR';
+        // }
     }
 }

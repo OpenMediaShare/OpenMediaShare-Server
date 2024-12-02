@@ -1,13 +1,10 @@
-import { electron } from 'process';
-import { PushError } from './utils';
 import { app, Notification } from 'electron';
-import { Mainwindow } from './main';
-
+import { configStore, Mainwindow } from './main';
 
 
 export class AuthManager {
     clients: Client[];
-    activeClient: Client | {uuid: string};
+    activeClient: Client;
     constructor(){
         this.clients = [];
         this.activeClient = null;
@@ -16,13 +13,22 @@ export class AuthManager {
     updateClient(uuid, metadata: VideoMetadata, ip) {
         // console.log(this.clients.map(e => e.uuid == '432'));
         this.clients.forEach((client) => {
+            const now = Date.now();
+            const compare = now - client.lastUpdated;
+            //remove clients that haven't responded for 5 mins 
+            if (client.lastUpdated && (compare / 1000) > 300){
+                this.removeClientByUUID(client.uuid);
+            }
             if (client.uuid !== uuid) return;
+            // eslint-disable-next-line no-constant-condition
+            
+            client.lastUpdated = Date.now();
             client.ip = ip;
             client.clientInfo = {
-                'creator': metadata.data.creator ?? client.clientInfo.creator,
-                'title': metadata.data.title ?? client.clientInfo.title,
-                'thumbnail': metadata.data.thumbnail ?? client.clientInfo.thumbnail,
-                'playerState': metadata.data.playerState ?? client.clientInfo.playerState ?? 'unknown'
+                'creator': metadata.data.creator ?? client.clientInfo.creator ?? 'unknowm',
+                'title': metadata.data.title ?? client.clientInfo.title ?? 'unknown',
+                'thumbnail': metadata.data.thumbnail ?? client.clientInfo.thumbnail ?? 'unknown',
+                'playerState': metadata.data.playerState ?? 'unknown'
             };
             if (Mainwindow) Mainwindow.webContents.send('clientUpdate', this.clients);
             
@@ -32,10 +38,12 @@ export class AuthManager {
         // console.log(this.clients.map(e => e.uuid == '432'));
         this.clients.forEach((client) => {
             if (client.uuid !== uuid) return;
+            if (!client.clientInfo) return;
             client.clientInfo.playerState = state ?? 'unknown';
-            if (Mainwindow) Mainwindow.webContents.send('clientUpdate', this.clients);
+            
             
         });
+        if (Mainwindow) Mainwindow.webContents.send('clientUpdate', this.clients);
     }
     
 
@@ -46,24 +54,28 @@ export class AuthManager {
         this.clients.push(client);
         this.activeClient = client;
         if (!app.isReady()) return;
+        if (Mainwindow) Mainwindow.webContents.send('clientUpdate', this.clients);
+        if(!configStore.get('debugNotification')) return;
         new Notification({
             'urgency': 'critical',
             'body': client.uuid,
             'title': 'New Client',
         }).show();
-        if (Mainwindow) Mainwindow.webContents.send('clientUpdate', this.clients);
+        
     }
 
     addClientSilent(client: Client) {
         this.clients.forEach(loopClient => {if(loopClient.uuid == client.uuid) return;});
         this.clients.push(client);
         if (!app.isReady()) return;
+        if (Mainwindow) Mainwindow.webContents.send('clientUpdate', this.clients);
+        if(!configStore.get('debugNotification')) return;
         new Notification({
             'urgency': 'critical',
             'body': client.uuid,
             'title': 'New Client (Silent)',
         }).show();
-        if (Mainwindow) Mainwindow.webContents.send('clientUpdate', this.clients);
+        
     }
 
     getClientByUUID(uuid: string): Client{
@@ -75,10 +87,14 @@ export class AuthManager {
     }
 
     removeClientByName(name: string) {
+        if (this.activeClient.name == name) {
+            this.activeClient = null;
+        }
         for(let i=0;i<this.clients.length;i++) {
             if(this.clients[i].name == name) {
                 this.clients.splice(i, 1);
                 if (!app.isReady()) return;
+                if(!configStore.get('debugNotification')) return;
                 new Notification({
                     'urgency': 'critical',
                     'body': name,
@@ -89,11 +105,17 @@ export class AuthManager {
         }
     }
 
+
+
     removeClientByUUID(uuid: string) {
+        if (this.activeClient.uuid == uuid) {
+            this.activeClient = null;
+        }
         for(let i=0;i<this.clients.length;i++) {
             if(this.clients[i].uuid == uuid) {
                 this.clients.splice(i, 1);
                 if (!app.isReady()) return;
+                if(!configStore.get('debugNotification')) return;
                 new Notification({
                     'urgency': 'critical',
                     'body': uuid,
@@ -107,6 +129,7 @@ export class AuthManager {
     setActive(client: Client) {
         this.activeClient = client;
         if (!app.isReady()) return;
+        if(!configStore.get('debugNotification')) return;
         new Notification({
             'urgency': 'critical',
             'body': client.uuid,
