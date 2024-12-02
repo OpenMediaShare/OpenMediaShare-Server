@@ -103,7 +103,7 @@ export class InfoStore extends TypedEventEmitter<LocalEventTypes>{
     }
 
     updateState(state: PlayerState){
-        this.info.data.playerState = state;
+        this.info.data.playerState = state ?? 'unknown';
         this.emit('playerStateChange', state);
     }
 

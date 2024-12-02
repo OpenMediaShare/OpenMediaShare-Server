@@ -199,7 +199,7 @@ webServer.put('/api/controls/seek/percent/:percentFloat/',(req,res) => {
 
 webServer.post('/api/controls/status',(req,res) => {
     authManager.updateClientState(req.body.auth.uuid,req.body.data.playerState);
-    store.updateState(req.body.data.state );
+    store.updateState(req.body.data.playerState );
     res.sendStatus(200);
 });
 
