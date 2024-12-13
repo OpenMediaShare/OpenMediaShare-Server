@@ -25,12 +25,10 @@ webServer.use(cors({origin: '*'}));
 webServer.use(bodyParser.json());
 webServer.use((req, res, next) => {
     logger.dinfo(['WebServ','Middleware',req.method],`${req.url}`);
-    // console.log(`[RestAPI] [Debug] [${req.method}]: ${req.url}`);
     if(configStore.get('debug')){
         console.log(req.body);
     }
     
-    // console.log(`    ${JSON.stringify(req.body)}`);
     if (req.method !== 'POST') {next(); return;}
     if (req.body.auth !== undefined && req.body.auth.uuid !== undefined) {next(); return;}
     res.sendStatus(400);

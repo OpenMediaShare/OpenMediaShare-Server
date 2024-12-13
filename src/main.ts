@@ -36,7 +36,7 @@ function createWindow() {
         },
         frame: true,
         autoHideMenuBar: true,
-        backgroundMaterial: 'acrylic',
+        backgroundMaterial: 'none',
         // transparent: true,
         icon: path.join(__dirname, '../build', 'YTlogo4.png'),
 

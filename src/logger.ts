@@ -82,7 +82,7 @@ export class Logger {
 
     derror(type: string[], text: string) {
         if(!configStore.get('debug')) return;
-        let logMessage = `${colors.red}ERROR${colors.clear} | ${this.timeFormatter(Date.now())} | `;
+        let logMessage = `${colors.purple}DEBUG${colors.clear} ${colors.red}ERROR${colors.clear} | ${this.timeFormatter(Date.now())} | `;
         type.forEach(type => {
             logMessage += `${type} | `;
         });
