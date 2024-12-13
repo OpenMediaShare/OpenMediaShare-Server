@@ -1,7 +1,7 @@
 # OpenMediaShare
 A program built to manage playback[^2], and share playing media data to local running apps using a RestAPI and or Websockets[^1].
 
-## Serivce Providers 
+## Service Providers 
 Service Proiders are anything that feeds media data into the program.
 * [OpenMediaShare/OpenMediaShare-UserScripts](https://github.com/OpenMediaShare/OpenMediaShare-UserScripts)
   
@@ -17,8 +17,8 @@ List of trusted plugins
 * WaterWolf5918/VibeLight - Software to controll home assistant based lighting from thumbnail colors.
 * WaterWolf5918/WatchRPC - DiscordRPC media share for any service.
 
-[^1]: Websockets are not currently supported but are planned.
-[^2]: Playback controlls are currently not support and will be service depended once added.
+[^1]: Websockets currently added but may be unstable.
+[^2]: Playback controlls are provider depended.
 ### Developers
 > [!TIP]
 > Look at the [wiki](https://github.com/WaterWolf5918/OpenMediaShare/wiki/) for documentation on stuff like the protocol.
