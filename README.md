@@ -3,8 +3,7 @@ A program built to manage playback[^2], and share playing media data to local ru
 
 ## Serivce Providers 
 Service Proiders are anything that feeds media data into the program.
-* WaterWolf5918/OpenMediaShare-Browser
-* WaterWolf5918/OpenMediaShare-Spicetify
+* [OpenMediaShare/OpenMediaShare-UserScripts](https://github.com/OpenMediaShare/OpenMediaShare-UserScripts)
   
 ## Plugins 
 > [!CAUTION]
