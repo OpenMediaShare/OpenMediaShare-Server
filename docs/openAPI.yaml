@@ -3,6 +3,9 @@ info:
   title: OpenMediaShare API Docs
   version: 1.0.0
   description: Rest API docs for the OpenMediaShare project
+servers:
+  - url: http://localhost:9494/
+    description: ""
 paths:
   /api/media/all:
     get:
@@ -31,11 +34,13 @@ paths:
             text/plain:
               schema:
                 type: string
+                title: UpdatesSetsMediaInfoCreated
         "400":
           content:
             text/plain:
               schema:
                 type: string
+                title: UpdatesSetsMediaInfoBadRequest
           description: The server could not understand the request due to invalid syntax.
             The client should modify the request and try again.
       requestBody:
@@ -92,6 +97,7 @@ paths:
                     $ref: "#/components/schemas/PlayerState"
                 required:
                   - state
+                title: GetsThePlayerStateOfTheActiveSessionOk
     post:
       operationId: updatesPlayerStateSessionProvidedInBody
       tags:
@@ -105,6 +111,7 @@ paths:
             text/plain:
               schema:
                 type: string
+                title: UpdatesPlayerStateSessionProvidedInBodyOk
         "400":
           description: The server could not understand the request due to invalid syntax.
             The client should modify the request and try again.
@@ -112,6 +119,7 @@ paths:
             text/plain:
               schema:
                 type: string
+                title: UpdatesPlayerStateSessionProvidedInBodyBadRequest
       parameters: []
       description: |-
         Not meant for external control useage. 
@@ -156,6 +164,7 @@ paths:
             text/plain:
               schema:
                 type: string
+                title: RequestsPlaybackFromTheActiveSessionOk
   /api/control/volume/{volume_level}:
     put:
       operationId: requestsVolumeChangeFromTheActiveSession
@@ -172,6 +181,7 @@ paths:
             text/plain:
               schema:
                 type: string
+                title: RequestsVolumeChangeFromTheActiveSessionOk
   /api/control/pause:
     put:
       operationId: requestsPauseFromTheActiveSession
@@ -186,6 +196,7 @@ paths:
             text/plain:
               schema:
                 type: string
+                title: RequestsPauseFromTheActiveSessionOk
       parameters: []
   /api/control/rewind:
     put:
@@ -201,6 +212,7 @@ paths:
             text/plain:
               schema:
                 type: string
+                title: RequestsSkipBackwardsFromTheActiveSessionOk
       parameters: []
       description: >-
         This endpoint is confusing because it says rewind, but it really just
@@ -224,6 +236,7 @@ paths:
             text/plain:
               schema:
                 type: string
+                title: RequestsSkipForwardsFromTheActiveSessionOk
   /api/controls/{session_uuid}:
     get:
       operationId: pollsForActionRequestsFromActiveSession
@@ -268,12 +281,14 @@ paths:
             text/plain:
               schema:
                 type: string
+                title: CreatesAVaildSessionFromTheUuidProviededOk
         "409":
           description: UUID exists
           content:
             text/plain:
               schema:
                 type: string
+                title: CreatesAVaildSessionFromTheUuidProviededConflict
   /api/auth/closeession:
     delete:
       operationId: endsAOpenSessionCleanly
@@ -288,6 +303,7 @@ paths:
             text/plain:
               schema:
                 type: string
+                title: EndsAOpenSessionCleanlyOk
     post:
       operationId: endsAOpenSessionCleanlyUsingPost
       tags:
@@ -301,6 +317,7 @@ paths:
             text/plain:
               schema:
                 type: string
+                title: EndsAOpenSessionCleanlyUsingPostOk
   /api/auth/main:
     post:
       operationId: makesProvidedSessionActive
@@ -315,6 +332,7 @@ paths:
             text/plain:
               schema:
                 type: string
+                title: MakesProvidedSessionActiveOk
     get:
       operationId: getListOfClients
       tags:
@@ -338,6 +356,7 @@ paths:
                 required:
                   - active
                   - all
+                title: GetListOfClientsOk
 components:
   schemas:
     PlayerState:
