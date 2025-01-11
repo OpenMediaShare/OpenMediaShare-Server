@@ -1,0 +1,507 @@
+openapi: 3.1.0
+info:
+  title: OpenMediaShare API Docs
+  version: 1.0.0
+  description: Rest API docs for the OpenMediaShare project
+paths:
+  /api/media/all:
+    get:
+      operationId: getsAllMediaInfo
+      tags:
+        - media
+      summary: Gets all media info.
+      responses:
+        "200":
+          description: The request was successful, and the server has returned the
+            requested resource in the response body.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoMetadataFull"
+      parameters: []
+    post:
+      operationId: updatesSetsMediaInfo
+      tags:
+        - media
+      summary: Updates/Sets media info
+      responses:
+        "201":
+          description: The request was successful, and a new resource was created.
+          content:
+            text/plain:
+              schema:
+                type: string
+        "400":
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: The server could not understand the request due to invalid syntax.
+            The client should modify the request and try again.
+      requestBody:
+        required: true
+        description: ""
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VideoMetadataFull"
+  /api/media/video:
+    get:
+      operationId: getsBasicMediaData
+      tags:
+        - media
+      summary: Gets basic media data
+      responses:
+        "200":
+          description: The request was successful, and the server has returned the
+            requested resource in the response body.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoMetadataData"
+  /api/media/time:
+    get:
+      operationId: getsTimeMediaData
+      tags:
+        - media
+      summary: Gets time media data
+      responses:
+        "200":
+          description: The request was successful, and the server has returned the
+            requested resource in the response body.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoMetadataTime"
+  /api/controls/status:
+    get:
+      operationId: getsThePlayerStateOfTheActiveSession
+      tags:
+        - controls
+      summary: Gets the player state of the active session
+      responses:
+        "200":
+          description: The request was successful, and the server has returned the
+            requested resource in the response body.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  state:
+                    $ref: "#/components/schemas/PlayerState"
+                required:
+                  - state
+    post:
+      operationId: updatesPlayerStateSessionProvidedInBody
+      tags:
+        - controls
+      summary: Updates player state session provided in body
+      responses:
+        "200":
+          description: The request was successful, and the server has returned the
+            requested resource in the response body.
+          content:
+            text/plain:
+              schema:
+                type: string
+        "400":
+          description: The server could not understand the request due to invalid syntax.
+            The client should modify the request and try again.
+          content:
+            text/plain:
+              schema:
+                type: string
+      parameters: []
+      description: |-
+        Not meant for external control useage. 
+
+        Innternal endpoint meant for media providers.
+      requestBody:
+        required: true
+        description: ""
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                auth:
+                  type: object
+                  properties:
+                    uuid:
+                      type: string
+                  required:
+                    - uuid
+                data:
+                  type: object
+                  properties:
+                    playerState:
+                      type: string
+                  required:
+                    - playerState
+              required:
+                - auth
+                - data
+  /api/control/play:
+    put:
+      operationId: requestsPlaybackFromTheActiveSession
+      tags:
+        - controls
+      summary: Requests playback from the active session
+      responses:
+        "200":
+          description: The request was successful, and the server has returned the
+            requested resource in the response body.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /api/control/volume/{volume_level}:
+    put:
+      operationId: requestsVolumeChangeFromTheActiveSession
+      tags:
+        - controls
+      summary: Requests volume change from the active session
+      parameters:
+        - $ref: "#/components/parameters/volume_level"
+      responses:
+        "200":
+          description: The request was successful, and the server has returned the
+            requested resource in the response body.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /api/control/pause:
+    put:
+      operationId: requestsPauseFromTheActiveSession
+      tags:
+        - controls
+      summary: Requests pause from the active session
+      responses:
+        "200":
+          description: The request was successful, and the server has returned the
+            requested resource in the response body.
+          content:
+            text/plain:
+              schema:
+                type: string
+      parameters: []
+  /api/control/rewind:
+    put:
+      operationId: requestsSkipBackwardsFromTheActiveSession
+      tags:
+        - controls
+      summary: Requests skip backwards from the active session
+      responses:
+        "200":
+          description: The request was successful, and the server has returned the
+            requested resource in the response body.
+          content:
+            text/plain:
+              schema:
+                type: string
+      parameters: []
+      description: >-
+        This endpoint is confusing because it says rewind, but it really just
+        means skip backwards, either to the last song or to start of the song.
+        Outcome depends on the platform.
+
+
+        Sorry for not being able to think of a better endpoint when this was
+        created.
+  /api/control/skip:
+    put:
+      operationId: requestsSkipForwardsFromTheActiveSession
+      tags:
+        - controls
+      summary: Requests skip forwards from the active session
+      responses:
+        "200":
+          description: The request was successful, and the server has returned the
+            requested resource in the response body.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /api/controls/{session_uuid}:
+    get:
+      operationId: pollsForActionRequestsFromActiveSession
+      tags:
+        - controls
+      summary: Polls for action requests from active session
+      parameters:
+        - $ref: "#/components/parameters/session_uuid"
+      responses:
+        "200":
+          description: The request was successful, and the server has returned the
+            requested resource in the response body.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ControlRequests"
+        "401":
+          description: Authentication is required to access the requested resource. The
+            client must include the appropriate credentials.
+          content:
+            text/plain:
+              schema:
+                type: string
+        "403":
+          description: The server understood the request, but refuses to authorize it.
+            Ensure the client has appropriate permissions.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /api/auth/opensession:
+    post:
+      operationId: createsAVaildSessionFromTheUuidProvieded
+      tags:
+        - sessions
+      summary: Creates a vaild session from the uuid provieded.
+      responses:
+        "200":
+          description: The request was successful, and the server has returned the
+            requested resource in the response body.
+          content:
+            text/plain:
+              schema:
+                type: string
+        "409":
+          description: UUID exists
+          content:
+            text/plain:
+              schema:
+                type: string
+  /api/auth/closeession:
+    delete:
+      operationId: endsAOpenSessionCleanly
+      tags:
+        - sessions
+      summary: Ends a open session cleanly
+      responses:
+        "200":
+          description: The request was successful, and the server has returned the
+            requested resource in the response body.
+          content:
+            text/plain:
+              schema:
+                type: string
+    post:
+      operationId: endsAOpenSessionCleanlyUsingPost
+      tags:
+        - sessions
+      summary: Ends a open session cleanly using post
+      responses:
+        "200":
+          description: The request was successful, and the server has returned the
+            requested resource in the response body.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /api/auth/main:
+    post:
+      operationId: makesProvidedSessionActive
+      tags:
+        - sessions
+      summary: Makes provided session active
+      responses:
+        "200":
+          description: The request was successful, and the server has returned the
+            requested resource in the response body.
+          content:
+            text/plain:
+              schema:
+                type: string
+    get:
+      operationId: getListOfClients
+      tags:
+        - sessions
+      summary: Get list of clients
+      responses:
+        "200":
+          description: The request was successful, and the server has returned the
+            requested resource in the response body.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  active:
+                    $ref: "#/components/schemas/Client"
+                  all:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Client"
+                required:
+                  - active
+                  - all
+components:
+  schemas:
+    PlayerState:
+      type: string
+      enum:
+        - playing
+        - paused
+        - unknown
+      description: ""
+    VideoMetadataFull:
+      type: object
+      properties:
+        auth:
+          $ref: "#/components/schemas/ClientAuth"
+        requests:
+          $ref: "#/components/schemas/ControlRequests"
+        data:
+          $ref: "#/components/schemas/VideoMetadataData"
+        time:
+          $ref: "#/components/schemas/VideoMetadataTime"
+      required:
+        - auth
+        - data
+        - time
+      description: This only includes the spec as of 1/11/2025.
+    VideoMetadataTime:
+      type: object
+      description: ""
+      properties:
+        currentTime:
+          type: string
+        totalTime:
+          type: string
+        timePercent:
+          type: string
+        formattedTime:
+          type: string
+    VideoMetadataData:
+      type: object
+      description: ""
+      properties:
+        creator:
+          type: string
+        title:
+          type: string
+        views:
+          type: string
+        likes:
+          type: string
+        thumbnail:
+          type: string
+        thumbnail2:
+          type: string
+        url:
+          type: string
+        color:
+          type: object
+        lyrics:
+          type: array
+          items:
+            type: string
+        playerState:
+          $ref: "#/components/schemas/PlayerState"
+    Client:
+      type: object
+      properties:
+        ip:
+          type: string
+        clientInfo:
+          type: string
+        lastUpdated:
+          type: string
+        name:
+          type: string
+        uuid:
+          type: string
+        service:
+          type: string
+      required:
+        - ip
+        - clientInfo
+        - lastUpdated
+        - name
+        - uuid
+        - service
+      description: ""
+    ClientAuth:
+      type: object
+      description: ""
+      properties:
+        name:
+          type: string
+        uuid:
+          type: string
+        service:
+          type: string
+      required:
+        - name
+        - uuid
+        - service
+    ControlRequests:
+      type: object
+      properties:
+        play:
+          type: string
+        pause:
+          type: string
+        volume:
+          type: number
+        rewind:
+          type: string
+        skip:
+          type: string
+        seek:
+          type: number
+      required:
+        - play
+        - pause
+        - volume
+        - rewind
+        - skip
+        - seek
+      description: ""
+  parameters:
+    volume_level:
+      name: volume_level
+      in: path
+      description: |-
+        Volume level as a float.
+        0.0 being 0%, 0.5 being 50% and 1 being 100%
+      schema:
+        type: number
+        minimum: 0
+        maximum: 1
+        format: float
+        description: |-
+          Volume from 0% to 100% as a float.
+          0.0 being 0%, 0.5 being 50% and 1 being 100%
+        examples:
+          - 0.5
+      explode: false
+      style: simple
+      allowReserved: false
+      allowEmptyValue: true
+    session_uuid:
+      name: session_uuid
+      in: path
+      description: uuid of a session
+      schema:
+        type: string
+        minimum: 0
+        maximum: 1
+        format: float
+        description: |-
+          Volume from 0% to 100% as a float.
+          0.0 being 0%, 0.5 being 50% and 1 being 100%
+        examples:
+          - 0.5
+      explode: false
+      style: simple
+      allowReserved: false
+      allowEmptyValue: true
+tags:
+  - name: media
+  - name: controls
+  - name: controls polling
+  - name: sessions

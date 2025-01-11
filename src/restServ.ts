@@ -148,9 +148,9 @@ webServer.get('/api/media/time',(req,res) => {
 // Controls 
 webServer.get('/api/controls/:uuid/',(req,res) => {
     //add support for diffrent clients 
-    if (store.info.auth == undefined) {res.sendStatus(200); return;}
-    if (store.info.auth.uuid == undefined) {res.sendStatus(200); return;}
-    if (req.params.uuid !== store.info.auth.uuid) {res.sendStatus(200); return;}
+    if (store.info.auth == undefined) {res.sendStatus(403); return;}
+    if (store.info.auth.uuid == undefined) {res.sendStatus(403); return;}
+    if (req.params.uuid !== store.info.auth.uuid) {res.sendStatus(401); return;}
     res.send(store.info.requests);
     store.info.requests = {};
 });
@@ -188,8 +188,7 @@ webServer.put('/api/controls/skip',(req,res) => {
 webServer.put('/api/controls/seek/percent/:percentFloat/',(req,res) => {
     const float = parseFloat(req.params.percentFloat) ?? 0.0;
     const seconds = float * store.info.time.totalTime;
-
-    // store.info.requests.seek
+    
     store.info.requests = {seek: seconds};
     res.sendStatus(200);
     boardcastToWSClients({event: 'seekEvent',seek: seconds});
