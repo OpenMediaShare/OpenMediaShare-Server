@@ -1,6 +1,6 @@
 {
   "name": "open_media_share",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "A program built to manage playback, and share playing media data to local running apps using a RestAPI and or Websockets.",
   "scripts": {
     "make": "npm run build && electron-forge make",
