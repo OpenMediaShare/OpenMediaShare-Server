@@ -50,7 +50,7 @@ export class Logger {
     }
 
     warn(type: string[], text: string) {
-        let logMessage = `${colors.purple}DEBUG${colors.clear} ${colors.yellow}WARN${colors.clear} | ${this.timeFormatter(Date.now())} | `;
+        let logMessage = `${colors.yellow}WARN${colors.clear} | ${this.timeFormatter(Date.now())} | `;
         type.forEach(type => {
             logMessage += `${type} | `;
         });
@@ -71,7 +71,7 @@ export class Logger {
     }
 
     error(type: string[], text: string) {
-        let logMessage = `${colors.purple}DEBUG${colors.clear} ${colors.red}ERROR${colors.clear} | ${this.timeFormatter(Date.now())} | `;
+        let logMessage = `${colors.red}ERROR${colors.clear} | ${this.timeFormatter(Date.now())} | `;
         type.forEach(type => {
             logMessage += `${type} | `;
         });

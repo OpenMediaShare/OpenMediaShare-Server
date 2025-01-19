@@ -25,10 +25,10 @@ export class AuthManager {
             client.lastUpdated = Date.now();
             client.ip = ip;
             client.clientInfo = {
-                'creator': metadata.data.creator ?? client.clientInfo.creator ?? 'unknowm',
-                'title': metadata.data.title ?? client.clientInfo.title ?? 'unknown',
-                'thumbnail': metadata.data.thumbnail ?? client.clientInfo.thumbnail ?? 'unknown',
-                'playerState': metadata.data.playerState ?? 'unknown'
+                'creator': metadata?.data?.creator ?? client?.clientInfo?.creator ?? 'unknowm',
+                'title': metadata?.data?.title ?? client?.clientInfo?.title ?? 'unknown',
+                'thumbnail': metadata?.data?.thumbnail ?? client?.clientInfo?.thumbnail ?? 'unknown',
+                'playerState': metadata?.data?.playerState ?? 'unknown'
             };
             if (Mainwindow) Mainwindow.webContents.send('clientUpdate', this.clients);
             

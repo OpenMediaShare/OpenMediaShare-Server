@@ -151,7 +151,7 @@ td {
 }
 
 
-@media (max-width: 900px) {
+@media (max-width: 950px) {
     .home-page-table-uuid {
         display: none;
     }
