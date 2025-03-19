@@ -40,17 +40,19 @@ declare global {
 
     interface PluginModules { electron, infoStore, express }
     interface FSPlugin {
-        start: (PluginModules, pluginConfigHelper) => void,
+        start: (PluginModules, pluginConfigHelper, TypedEventEmitter) => void,
         stop: () => void,
         infoUpdate: (PluginModules, VideoMetadata, pluginConfigHelper) => void,
         stateUpdate: (PluginModules, PlayerState, pluginConfigHelper) => void
         info: {
             name: string,
-            auther: string,
+            author: string,
             configBuilder: configBuilder,
         }
     }
 
+
+    
 
 }
 

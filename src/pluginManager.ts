@@ -6,9 +6,19 @@ import path from 'path';
 import { store } from './main';
 import { webServer } from './restServ';
 import { Logger } from './logger';
+import { TypedEventEmitterClass } from './utils';
+
+type PluginEvents = {
+    playbackChange: [PlayerState],
+    mediaChange: [VideoMetadata],
+    rawInfoUpdate: [VideoMetadata]
+    rawPlayerStateChange: [PlayerState]
+}
+
 
 const logger = new Logger();
 export class PluginManager {
+    lastSong: string;
     pluginDir: any;
     plugins: FSPlugin[];
     constructor(){
@@ -18,39 +28,57 @@ export class PluginManager {
     }
 
     async startPlugins(){
-        let consoleLogDetect = true;
+        // let consoleLogDetect = true;
         const files = readdirSync(this.pluginDir,{ withFileTypes: true });
         const electronImport = await import('electron');
         const modules = {
             electron: electronImport,
-            infoStore: store,
-            express: webServer
+            express: webServer,
+            Logger: Logger
         };
         for(const file of files) {
             if (!file.isFile() || !file.name.endsWith('js')) continue;
             logger.info(['Plugin Manager'],`Importing Plugin: ${file.name}`);
             const plugin: FSPlugin = await import(path.join(this.pluginDir,file.name)); 
+
+            if (!plugin.info || !plugin.info.name) {
+                logger.warn(['Plugin Manager'],`File ${file.name} isn't a vaild plugin, Skipping. `);
+                return;
+            }
             logger.info(['Plugin Manager'],`Starting Plugin: ${plugin.info.name}`);
             const oldLog = console.log;
-            console.log = (e) => {
-                if (consoleLogDetect) {
-                    oldLog(`This plugin is using console.log, Please ask ${plugin.info.auther} to consider switching to the plugin logger instead.`);
-                }
-                consoleLogDetect = false;
-                console.log = oldLog;
-                logger.info(['Legacy Plugin',plugin.info.name],e);
-                // oldLog(e);
-            };
+
             const pluginConfigHelper = new PluginConfigHelper(plugin);
-            plugin.start(modules,pluginConfigHelper);
+            const pluginEventDispatcher: TypedEventEmitterClass<PluginEvents> = new TypedEventEmitterClass();
+
+            store.on('infoUpdated',(e) => {
+                pluginEventDispatcher.emit('rawInfoUpdate',e);
+                if (this.lastSong == e.data.title) return;
+                pluginEventDispatcher.emit('mediaChange',e);
+                this.lastSong = e.data.title;
+            });
+
+            store.on('playerStateChange',(e) => {
+                pluginEventDispatcher.emit('rawPlayerStateChange',e);
+                if (e == undefined) return;
+                pluginEventDispatcher.emit('playbackChange',e);
+            });
+
+
+
+            plugin.start(modules,pluginConfigHelper,pluginEventDispatcher);
+            // console.log = oldLog;
             this.plugins.push(plugin);
-            //check to see if infoupdate exists before calling it
+
+            // check to see if infoupdate exists before calling it
             if (plugin.infoUpdate instanceof Function){
+                logger.warn(['Plugin Manager'],`Plugin ${plugin.info.name} looks to be using the v0 plugin API. Please ask ${plugin.info.author} to consider switching to the new v1 API.`);
                 store.on('infoUpdated',(metadata) => {
                     plugin.infoUpdate(modules,metadata,pluginConfigHelper);
                 });
             }
             if (plugin.stateUpdate instanceof Function){
+                logger.warn(['Plugin Manager'],`Plugin ${plugin.info.name} looks to be using the v0 plugin API. Please ask ${plugin.info.author} to consider switching to the new v1 API.`);
                 store.on('playerStateChange',(playerState) => {
                     plugin.stateUpdate(modules,playerState,pluginConfigHelper);
                 });
