@@ -45,6 +45,13 @@ export class PluginManager {
                 logger.warn(['Plugin Manager'],`File ${file.name} isn't a vaild plugin, Skipping. `);
                 return;
             }
+            // Fix for my bad spelling, i'm sorry :(
+            // @ts-expect-error This is a missing type because it doesn't exist in any new projects, and is from my miss spelling.
+            if (plugin.info.auther) {
+                // @ts-expect-error This is a missing type because it doesn't exist in any new projects, and is from my miss spelling.
+                plugin.info.author = plugin.info.auther;
+            }
+
             logger.info(['Plugin Manager'],`Starting Plugin: ${plugin.info.name}`);
             const oldLog = console.log;
 
