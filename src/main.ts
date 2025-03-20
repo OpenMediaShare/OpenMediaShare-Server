@@ -76,6 +76,9 @@ ipcMain.handle('setConfigKey',(_event, key,value) => {
     return configStore.set(key,value);
 });
 
+ipcMain.handle('getPluginList',() => {
+    return pluginManager.plugins.map(p => p.info);
+});
 
 app.whenReady().then(() => {
     createWindow();

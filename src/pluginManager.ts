@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { homedir } from 'os';
 import path from 'path';
 
-import { store } from './main';
+import { Mainwindow, store } from './main';
 import { webServer } from './restServ';
 import { Logger } from './logger';
 import { TypedEventEmitterClass } from './utils';
@@ -74,8 +74,7 @@ export class PluginManager {
 
 
             plugin.start(modules,pluginConfigHelper,pluginEventDispatcher);
-            // console.log = oldLog;
-            this.plugins.push(plugin);
+            plugin.info.isRunning = true;
 
             // check to see if infoupdate exists before calling it
             if (plugin.infoUpdate instanceof Function){
@@ -91,22 +90,15 @@ export class PluginManager {
                 });
             }
             logger.info(['Plugin Manager'],`Started Plugin: ${plugin.info.name}`);
+            this.plugins.push(plugin);
         }
+        if (Mainwindow) Mainwindow.webContents.send('allPluginsLoaded',this.plugins.map(p => p.info));
     }
 
 
 
 
     async stopPlugins(){
-        // const files = readdirSync(this.pluginDir,{ withFileTypes: true });
-        // for(const file of files) {
-        //     if (!file.isFile() || !file.name.endsWith('js')) return;
-        //     console.log(`Starting Plugin: ${file.name}`);
-        //     const plugin = await import(path.join(this.pluginDir,file.name));
-        //     plugin.stop();
-        //     console.log(`Started Plugin: ${plugin.info.name}`);
-        // }
-
         // why were we creating a new plugin before calling stop, this wasn't doing anything for the running plugin wtf
         this.plugins.forEach(plugin => {
             logger.info(['Plugin Manager'],`Stopping Plugin: ${plugin.info.name}`);

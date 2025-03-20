@@ -17,15 +17,29 @@ contextBridge.exposeInMainWorld('settings', {
     getStatus: () => ipcRenderer.invoke('getOptions'),
     forceRefresh: () => ipcRenderer.invoke('forceRefresh'),
 
-    
-    get: (key) => ipcRenderer.invoke('getConfigKey',key),
-    set: (key,value) => ipcRenderer.invoke('setConfigKey',key,value),
+
+    get: (key) => ipcRenderer.invoke('getConfigKey', key),
+    set: (key, value) => ipcRenderer.invoke('setConfigKey', key, value),
 });
+
+contextBridge.exposeInMainWorld('plugin', {
+    pluginList: () => ipcRenderer.invoke('getPluginList')
+});
+
 
 contextBridge.exposeInMainWorld('theme', {
     setTheme: (theme) => ipcRenderer.invoke('setTheme', theme),
     getTheme: () => ipcRenderer.invoke('getTheme'),
 });
+
+// ipcRenderer.on('allPluginsLoaded', (event, data) => {
+//     const plugins: FSPlugin['info'][] = data;
+//     drawPlugins(plugins);
+// });
+
+
+
+
 
 ipcRenderer.on('clientUpdate', (event, data: Client[]) => {
     console.log(data);
@@ -67,7 +81,9 @@ ipcRenderer.on('clientUpdate', (event, data: Client[]) => {
 });
 
 
-function getStateIcon(playerState: PlayerState){
+
+
+function getStateIcon(playerState: PlayerState) {
     switch (playerState) {
     case 'playing':
         return 'play_arrow';
@@ -80,8 +96,5 @@ function getStateIcon(playerState: PlayerState){
         break;
     }
 }
-
-
-
 
 

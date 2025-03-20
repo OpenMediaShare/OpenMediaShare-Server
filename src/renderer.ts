@@ -100,6 +100,41 @@ configSettings.forEach(async (setting) => {
     });
 });
 
+function drawPlugins(plugins: FSPlugin['info'][]) {
+    const pluginPage = document.querySelector('#plugins-page .grid-container');
+    for (const plugin of plugins) {
+        console.log(plugin.name);
+        const html = `
+        <div class="plugin-details">
+            <div class="plugin-topbar">
+                <span class="plugin-title">${plugin.name}</span>
+                <span class="material-symbols-outlined">
+                    settings
+                </span>
+                <label class="switch">
+                    <input type="checkbox" checked=${plugin.isRunning}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <span class="plugin-author">By ${plugin.author}</span><br />
+            <span>${plugin.description ?? ''}</span>
+        </div>
+    `;
+        const pluginEl = document.createElement('div');
+        pluginEl.classList.add('plugin');
+        pluginEl.innerHTML = html;
+        pluginPage.appendChild(pluginEl);
+    }
+}
+
+// if ((performance.getEntries()[0] as PerformanceNavigationTiming).type == 'reload') {
+//     ipcRenderer.invoke('getPluginList')
+//         .then(p => drawPlugins(p));
+//     console.log('Reload');
+// }
+window.plugin.pluginList()
+    .then(p => drawPlugins(p));
+
 
 // .forEach((el: HTMLElement) => {
 //     el.addEventListener('click',(e) => {

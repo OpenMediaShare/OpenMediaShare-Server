@@ -48,6 +48,9 @@ declare global {
             name: string,
             author: string,
             configBuilder: configBuilder,
+            version?: string,
+            description?: string
+            isRunning: boolean
         }
     }
 
