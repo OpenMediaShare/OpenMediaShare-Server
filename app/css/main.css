@@ -15,6 +15,9 @@
     --timeBar-color-backup: rgb(0, 153, 255);
 }
 
+
+
+
 html,
 body {
     margin: 0;
@@ -303,6 +306,7 @@ input:checked+.slider:before {
     margin: 8px;
     padding: 10px;
     outline: 1px solid #3c3a4a;
+    border-radius: 8px;
     display: flex;
     font-size: 22px;
 }
@@ -328,6 +332,7 @@ input:checked+.slider:before {
     line-height: 1;
     background: #1f2335;
     border: none;
+    border-radius: 8px;
 }
 .plugin-input-checkbox input[type="checkbox"]::before{
     position: relative;
@@ -343,6 +348,7 @@ input:checked+.slider:before {
 .plugin-input-checkbox input[type="checkbox"]:checked::before{
     content: "✓";
     background: #002fff;
+    font-weight: bold;
 }
 
 .plugin-input-checkbox input[type="checkbox"]{
@@ -359,6 +365,7 @@ input:checked+.slider:before {
 
 .plugin-input-text input {
     border: none;
+    border-radius: 8px;
     background: #1f2335;
     font-size: 20px;
 }

@@ -2,30 +2,6 @@
 //@ts-nocheck
 
 
-
-windowAction = {
-    minimize: () => {
-        window.controls.minimize();
-    },
-    close: () => {
-        window.controls.close();
-    },
-};
-
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function button(text) {
-    switch (text) {
-    case 'index':
-        location.href = 'index.html';
-        break;
-    case 'settings':
-        location.href = 'settings.html';
-        break;
-    }
-}
-
-
 const sideTabs = document.getElementsByClassName('side-tab');
 Array.from(sideTabs).forEach(el => {
     el.addEventListener('click',(e) => {
@@ -166,7 +142,7 @@ function drawPluginSettings(index){
                     const pageElements = configBuilder.pages[page];
                     for (const el of pageElements){
                         const elDiv = document.createElement('div');
-                        
+                    
 
                         panel.append(elDiv);
                     }
@@ -176,17 +152,5 @@ function drawPluginSettings(index){
 }
 
 
-// if ((performance.getEntries()[0] as PerformanceNavigationTiming).type == 'reload') {
-//     ipcRenderer.invoke('getPluginList')
-//         .then(p => drawPlugins(p));
-//     console.log('Reload');
-// }
 window.plugin.pluginList()
     .then(p => drawPlugins(p));
-
-
-// .forEach((el: HTMLElement) => {
-//     el.addEventListener('click',(e) => {
-//         console.log(e.target);
-//     });
-// });
