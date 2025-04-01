@@ -23,7 +23,8 @@ contextBridge.exposeInMainWorld('settings', {
 });
 
 contextBridge.exposeInMainWorld('plugin', {
-    pluginList: () => ipcRenderer.invoke('getPluginList')
+    pluginList: () => ipcRenderer.invoke('getPluginList'),
+    getPluginConfig: (i) => ipcRenderer.invoke('getPluginConfig',i)
 });
 
 

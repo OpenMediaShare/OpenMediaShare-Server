@@ -158,5 +158,3 @@ class PluginConfigHelper {
         return json[key];
     }
 }
-
-

@@ -80,6 +80,15 @@ ipcMain.handle('getPluginList',() => {
     return pluginManager.plugins.map(p => p.info);
 });
 
+ipcMain.handle('getPluginConfig',(_event,index) => {
+    return pluginManager.plugins[index].info.configBuilder;
+});
+
+ipcMain.handle('setPluginConfig',(_event,index,config) => {
+    // return pluginManager.plugins[index].info.configBuilder;
+    throw new Error('Not Added Yet.');
+});
+
 app.whenReady().then(() => {
     createWindow();
     store.on('infoUpdated', () => {

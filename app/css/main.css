@@ -29,15 +29,27 @@ body {
     overflow: hidden;
 }
 
+#overlay {
+    position: fixed; /* Sit on top of the page content */
+    width: 100%; /* Full width (cover the whole page) */
+    height: 100%; /* Full height (cover the whole page) */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+    z-index: 10;
+}
 
-#sidebyside {
+
+.sidebyside {
     display: flex;
     width: 100%;
     height: 100%;
     flex-direction: row;
 }
 
-#sidebar {
+.sidebar {
     /* margin: 10px 0px 0px 0px; */
     padding: 10px 0px 10px 0px;
     display: flex;
@@ -95,6 +107,7 @@ body {
 .active-page {
     display: flex;
     width: 100%;
+    height: 100%;
     /* height: 100%; */
 }
 
@@ -104,6 +117,7 @@ body {
 
 
 #home-page {
+    height: fit-content;
     display: flex;
     width: 100%;
     justify-content: center;
@@ -177,6 +191,7 @@ td {
     margin: 0px 10px 10px 10px;
     max-width: 25vw;
     min-width: 25vw;
+    height: fit-content;
     /* max-width: 48%; */
 }
 
@@ -210,6 +225,11 @@ td {
     justify-content: space-evenly;
     background: #16161e;
     min-height: 40px;
+}
+
+#plugin-menu-sidebar {
+    margin-left: 10px;
+    background: #22222f;
 }
 
 
@@ -268,4 +288,77 @@ input:focus+.slider {
 input:checked+.slider:before {
 
     transform: translateX(22px);
+}
+
+#plugin-settings-page {
+    width: 100%;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+
+}
+
+.plugin-input-gen {
+    margin: 8px;
+    padding: 10px;
+    outline: 1px solid #3c3a4a;
+    display: flex;
+    font-size: 22px;
+}
+
+
+
+.plugin-input-checkbox {
+    display: flex;
+    /* justify-content: center; */
+    align-items: center;
+    flex-direction: row;
+    min-width: 250px;
+}
+
+.plugin-input-checkbox input[type="checkbox"]{
+    
+    margin-left: auto;
+    appearance: none;
+    position: relative;
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid;
+    line-height: 1;
+    background: #1f2335;
+    border: none;
+}
+.plugin-input-checkbox input[type="checkbox"]::before{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    content: " ";
+    font-size: 20px;
+
+}
+.plugin-input-checkbox input[type="checkbox"]:checked::before{
+    content: "✓";
+    background: #002fff;
+}
+
+.plugin-input-checkbox input[type="checkbox"]{
+    width: 20px;
+    height: 20px;
+}
+
+.plugin-input-text {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.plugin-input-text input {
+    border: none;
+    background: #1f2335;
+    font-size: 20px;
 }

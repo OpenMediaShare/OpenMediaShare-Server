@@ -17,27 +17,27 @@
 
 <body>
 
-    <div id="sidebyside">
-        <div id="sidebar">
-            <div id="home-item" class="sidebar-item sidebar-item-active">
+    <div id="" class="sidebyside">
+        <div class="sidebar">
+            <div id="home-item" class="sidebar-item side-tab sidebar-item-active">
                 <span class="material-symbols-outlined sidebar-item-icon">
                     home
                 </span>
                 Home
             </div>
-            <div id="plugins-item" class="sidebar-item">
+            <div id="plugins-item" class="sidebar-item side-tab">
                 <span class="material-symbols-outlined sidebar-item-icon">
                     extension
                 </span>
                 Plugins
             </div>
-            <div id="settings-item" class="sidebar-item">
+            <div id="settings-item" class="sidebar-item side-tab">
                 <span class="material-symbols-outlined sidebar-item-icon">
                     settings
                 </span>
                 Settings
             </div>
-            <div id="debug-item" class="sidebar-item hidden">
+            <div id="debug-item" class="sidebar-item side-tab hidden">
                 <span class="material-symbols-outlined sidebar-item-icon">
                     bug_report
                 </span>
@@ -73,9 +73,28 @@
 
             <div id="plugins-page" class="master-page plugins-page">
                 <!-- <h1>Work In Progress</h1> -->
-                <div class="grid-container">
+                <div id="plugin-settings-grid" class="grid-container hidden">
 
                 </div>
+
+                <div id="plugin-settings-panel" class="sidebyside">
+                    <div id="plugin-settings-sidebar" class="sidebar">
+
+                    </div>
+                    <div id="plugin-settings-page">
+
+                        <div class="plugin-input-gen plugin-input-text">
+                            <span>Text</span>
+                            <input type="text">
+                        </div>
+
+                        <div class="plugin-input-gen plugin-input-checkbox">
+                            <span>Checkbox</span>
+                            <input type="checkbox">
+                        </div>
+                    </div>
+                </div>
+
             </div>
             <div id="settings-page" class="master-page plugins-page">
                 <div class="grid-container">
