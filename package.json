@@ -28,7 +28,7 @@
     "@types/ws": "^8.5.13",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
-    "electron": "^25.1.0",
+    "electron": "^35.1.2",
     "eslint": "^8.53.0",
     "typescript": "^5.1.3"
   },
