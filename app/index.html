@@ -1,5 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenMediaShare</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="content">
+        <div class="sidebar">
+            <div class="sidebar-button active-sidebar-button" id="home">
+                <span class="material-symbols-rounded">home</span>
+                <p>Home</p>
+            </div>
+
+            <div class="sidebar-button" id="plugins">
+                <span class="material-symbols-rounded">extension</span>
+                <p>Plugins</p>
+            </div>
+
+            <div class="sidebar-button" id="settings">
+                <span class="material-symbols-rounded">settings</span>
+                <p>Settings</p>
+            </div>
+        </div>
+
+        <div class="page home-content active-page" id="home-content">
+            <div class="provider provider-header">
+                <div class="provider-image"><p>Image</p></div>
+                <div class="provider-state"><p>State</p></div>
+                <div class="provider-name"><p>Name</p></div>
+                <div class="provider-current-title"><p>Current Title</p></div>
+                <div class="provider-service"><p>Service</p></div>
+                <div class="provider-ip"><p>IP</p></div>
+                <div class="provider-uuid"><p>UUID</p></div>
+            </div>
+            <div class="provider">
+                <div class="provider-image"><p>image</p></div>
+                <div class="provider-state"><span class="material-symbols-rounded">play_arrow</span></div>
+                <div class="provider-name"><p>Spicetify Client</p></div>
+                <div class="provider-current-title"><p>KAMELEON<br>Kami Kehoe</p></div>
+                <div class="provider-service"><p>spicetify</p></div>
+                <div class="provider-ip"><p>::1</p></div>
+                <div class="provider-uuid"><p>b171afd2-5741-462f-87d2-53a928de8676</p></div>
+            </div>
+        </div>
+
+        <div class="page plugins-content" id="plugins-content">
+            <p>plugins</p>
+        </div>
+
+        <div class="page settings-content" id="settings-content">
+            <p class="settings-category">General</p>
+            <div class="settings-option">
+                <p class="settings-label">label</p>
+                <button class="settings-toggle">toggle</button>
+            </div>
+            <p class="settings-category">Debug</p>
+            <div class="settings-option">
+                <p class="settings-label">Show IPs</p>
+                <button class="settings-toggle">toggle</button>
+            </div>
+            <div class="settings-option">
+                <p class="settings-label">Show UUIDs</p>
+                <button class="settings-toggle">toggle</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../dist/renderer.js"></script>
+</body>
+</html>
+
+<!-- <!DOCTYPE html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8" />
@@ -16,7 +91,6 @@
 </head>
 
 <body>
-
     <div id="" class="sidebyside">
         <div class="sidebar">
             <div id="home-item" class="sidebar-item side-tab sidebar-item-active">
@@ -72,7 +146,6 @@
             </div>
 
             <div id="plugins-page" class="master-page plugins-page">
-                <!-- <h1>Work In Progress</h1> -->
                 <div id="plugin-settings-grid" class="grid-container ">
 
                 </div>
@@ -114,4 +187,4 @@
 
 </body>
 <script src="../dist/renderer.js"></script>
-</html>
+</html> -->
