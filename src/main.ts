@@ -13,7 +13,7 @@ export const store = new InfoStore();
 // export const configStore = new ConfigHelper(path.join(__dirname, '../config.json'));
 const configBuilder:PluginInfo['configBuilder'] = {
     pages: {
-        Gerneral: [
+        General: [
             {
                 type: 'checkbox',
                 id: 'label',

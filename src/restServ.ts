@@ -49,8 +49,11 @@ webServer.use((req, res, next) => {
     //Please switch to body.data that has all the same properties.
 
     //fix old providers and apps that still use video instead of info 
-    if (req.body.video){ req.body.data = req.body.video; }
-    if (req.body.data){ req.body.video = req.body.data; }
+    if (req.body !== undefined) {
+        if (req.body.video){ req.body.data = req.body.video; }
+        if (req.body.data){ req.body.video = req.body.data; }
+    }
+
     next(); return;
 });
 
