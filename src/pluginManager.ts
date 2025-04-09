@@ -110,17 +110,18 @@ export class PluginManager {
 
 }
 
-class PluginConfigHelper {
+export class PluginConfigHelper {
     name: string;
-    path: string;
+    filePath: string;
     vaild: boolean;
     configPath: string;
-    constructor(plugin: FSPlugin){
+    config: object;
+    constructor(plugin: {info: {name: string, configBuilder: configBuilder}},filePath=path.join(homedir(),'.openMediaShare','configs')){
         this.vaild = false;
         this.name = plugin.info.name;
-        this.path = path.join(homedir(),'.openMediaShare','configs');
-        this.configPath = path.join(this.path,`${this.name}.config.json`);
-        if (!existsSync(this.path)) mkdirSync(this.path,{recursive: true});
+        this.filePath = filePath;
+        this.configPath = path.join(this.filePath,`${this.name}.config.json`);
+        if (!existsSync(this.filePath)) mkdirSync(this.filePath,{recursive: true});
 
         if(plugin.info.configBuilder){
             this.buildPluginConfig(plugin);
@@ -129,7 +130,7 @@ class PluginConfigHelper {
         
     }
 
-    private buildPluginConfig(plugin: FSPlugin) {
+    private buildPluginConfig(plugin: {info: {name: string, configBuilder: configBuilder}}) {
         
         if(!existsSync(this.configPath)){
             const json = {};
@@ -144,17 +145,16 @@ class PluginConfigHelper {
             });
             writeFileSync(this.configPath,JSON.stringify(json,null,4),);
         }
+        this.config = JSON.parse(readFileSync(this.configPath,'utf-8'));
         //idk do ui stuff sometime
     }
 
     set(key,value) {
-        const json = JSON.parse(readFileSync(this.configPath,'utf-8'));
-        json[key] = value;
-        writeFileSync(this.configPath,JSON.stringify(json,null,4),);
+        this.config[key] = value;
+        writeFileSync(this.configPath,JSON.stringify(this.config,null,4),);
     }
 
     get(key) {
-        const json = JSON.parse(readFileSync(this.configPath,'utf-8'));
-        return json[key];
+        return this.config[key];
     }
 }

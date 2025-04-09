@@ -3,6 +3,13 @@
 const providerTenplate = document.getElementById('provider-tenplate');
 const providerTable = document.getElementById('provider-table');
 
+const settingsToggleTenplate = document.getElementById('settings-toggle-tenplate');
+
+const config = {
+    showIPS: false,
+    showUUIDS: false,
+};
+
 let clients: Client[] = [];
 
 for(const el of document.getElementsByClassName('sidebar-button')) {
@@ -25,6 +32,9 @@ for(const el of document.getElementsByClassName('sidebar-button')) {
         newActivePage.classList.add('active-page');
     });
 }
+
+loadWebSettings();
+renderSettings();
 
 window.callbacks.clientUpdate((_clients) => {
     if (clients.length == 0) {
@@ -72,15 +82,15 @@ window.callbacks.clientUpdate((_clients) => {
 
 function getStateIcon(playerState: PlayerState) {
     switch (playerState) {
-    case 'playing':
-        return 'play_arrow';
-        break;
-    case 'paused':
-        return 'pause';
-        break;
-    case 'unknown':
-        return 'question_mark';
-        break;
+        case 'playing':
+            return 'play_arrow';
+            break;
+        case 'paused':
+            return 'pause';
+            break;
+        case 'unknown':
+            return 'question_mark';
+            break;
     }
 }
 
@@ -120,7 +130,7 @@ function updateExistingClient(client: Client) {
 
 function drawNewClient(client: Client) {
     // [WaterWolf5918] Bandaid fix for Node not having methods it should in this case 
-    const newEl = ((providerTenplate as HTMLTemplateElement).content.cloneNode(true) as HTMLDivElement);
+    const newEl = ((providerTenplate as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment);
     newEl.querySelector('.provider').id = client.uuid;
     (newEl.querySelector('.provider-image img')       as HTMLImageElement).src           = client.clientInfo.thumbnail ?? './YTlogo4.png' ;
     (newEl.querySelector('.provider-state span')      as HTMLSpanElement).innerText      = getStateIcon(client.clientInfo.playerState ?? 'unknown');
@@ -132,8 +142,68 @@ function drawNewClient(client: Client) {
     (newEl.querySelector('.provider-ip p')            as HTMLParagraphElement).innerText = client.ip;
     (newEl.querySelector('.provider-uuid p')          as HTMLParagraphElement).innerText = client.uuid;
     
+    if (!config.showIPS) {
+        (newEl.querySelector('.provider-ip')   as HTMLDivElement).classList.add('hidden');
+    }
+    if (!config.showUUIDS) {
+        (newEl.querySelector('.provider-uuid') as HTMLDivElement).classList.add('hidden');
+    }
+
     providerTable.appendChild(newEl);
 }
+
+async function loadWebSettings() {
+    const showIPS = await window.settings.get('webDisplayIPs');
+    const showUUIDS = await window.settings.get('webDisplayUUIDs');
+
+    config.showIPS = showIPS;
+    config.showUUIDS = showUUIDS;
+    if (config.showIPS) {
+        document.querySelectorAll('.provider-ip').forEach(el => el.classList.remove('hidden'));
+    } else {
+        document.querySelectorAll('.provider-ip').forEach(el => el.classList.add('hidden'));
+    }
+    if (config.showUUIDS) {
+        document.querySelectorAll('.provider-uuid').forEach(el => el.classList.remove('hidden'));
+    } else {
+        document.querySelectorAll('.provider-uuid').forEach(el => el.classList.add('hidden'));
+    }
+
+}
+
+
+
+async function renderSettings(){
+    const settingsPage = document.getElementById('settings-content');
+    const configBuilder = await window.settings.getBuilder();
+    settingsPage.innerHTML = '';
+
+    for (const page in configBuilder.pages) { 
+        const el = document.createElement('p');
+        el.classList.add('settings-category');
+        el.innerText = page;
+        settingsPage.appendChild(el);
+        for (const setting of configBuilder.pages[page]){
+            const value = await window.settings.get(setting.id);
+            switch(setting.type) {
+                case 'checkbox': {
+                    const settingsEl = ((settingsToggleTenplate as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment);
+                    const toggle = settingsEl.querySelector('.toggle-swtich input[type="checkbox"]') as HTMLInputElement;
+                    (settingsEl.querySelector('.settings-label') as HTMLParagraphElement).innerText = setting.displayName;
+                    toggle.checked = (typeof value == 'boolean') ? value : false;
+                    toggle.addEventListener('change',() => {
+                        window.settings.set(setting.id,toggle.checked);
+                        loadWebSettings();
+                    });
+                    settingsPage.appendChild(settingsEl);
+                    break;
+                }
+            }
+
+        }
+    }
+}
+
 
 // const configSettings = [
 //     {

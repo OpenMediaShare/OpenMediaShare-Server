@@ -8,9 +8,11 @@ declare global {
         },
         settings: {
             forceRefresh: () => void,
-            get: (key) => void,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            get: (key) => any,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             set: (key,value) => any
+            getBuilder: () => PluginInfo['configBuilder']
         }
         plugins: {
             getPluginList: () => PluginInfo[],

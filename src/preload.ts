@@ -12,12 +12,9 @@ contextBridge.exposeInMainWorld('controls', {
 });
 
 contextBridge.exposeInMainWorld('settings', {
-    settings: () => ipcRenderer.invoke('settings', 'settings'),
-    status: (arg) => ipcRenderer.invoke('setOptions', arg),
-    getStatus: () => ipcRenderer.invoke('getOptions'),
     forceRefresh: () => ipcRenderer.invoke('forceRefresh'),
 
-
+    getBuilder: () => ipcRenderer.invoke('getConfigBuilder'),
     get: (key) => ipcRenderer.invoke('getConfigKey', key),
     set: (key, value) => ipcRenderer.invoke('setConfigKey', key, value),
 });

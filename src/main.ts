@@ -6,11 +6,56 @@ import { ConfigHelper } from './utils';
 import { InfoStore } from './infoStore';
 import { restSetup } from './restServ';
 import { networkInterfaces } from 'os';
-import { PluginManager } from './pluginManager';
+import { PluginConfigHelper, PluginManager } from './pluginManager';
 import { AuthManager } from './ClientManager';
 import { Logger } from './logger';
 export const store = new InfoStore();
-export const configStore = new ConfigHelper(path.join(__dirname, '../config.json'));
+// export const configStore = new ConfigHelper(path.join(__dirname, '../config.json'));
+const configBuilder:PluginInfo['configBuilder'] = {
+    pages: {
+        Gerneral: [
+            {
+                type: 'checkbox',
+                id: 'label',
+                displayName: 'Label',
+                required: true,
+                default: true
+            }
+        ],
+        Debug: [
+            {
+                type: 'checkbox',
+                id: 'debugNotification',
+                displayName: 'Display Debug Notifications',
+                required: true,
+                default: false
+            },
+            {
+                type: 'checkbox',
+                id: 'debug',
+                displayName: 'Display Debug Messages',
+                required: true,
+                default: false
+            },
+            {
+                type: 'checkbox',
+                id: 'webDisplayIPs',
+                displayName: 'Show IPs',
+                required: true,
+                default: false
+            },
+            {
+                type: 'checkbox',
+                id: 'webDisplayUUIDs',
+                displayName: 'Show UUIDs',
+                required: true,
+                default: false
+            }
+        ]
+    }
+};
+
+export const configStore = new PluginConfigHelper({'info': {'name': 'systen', 'configBuilder': configBuilder}},'./');
 export const authManager = new AuthManager();
 
 const pluginManager = new PluginManager();
@@ -65,6 +110,10 @@ function createWindow() {
 
 ipcMain.handle('forceRefresh', () => {
     Mainwindow.reload();
+});
+
+ipcMain.handle('getConfigBuilder',(_event, key) => {
+    return configBuilder;
 });
 
 ipcMain.handle('getConfigKey',(_event, key) => {

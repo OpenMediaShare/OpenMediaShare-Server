@@ -173,7 +173,8 @@ body {
     padding: 4px;
     background-color: var(--bg3);
     border-radius: 8px;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
+    align-items: center;
 }
 
 .settings-label {
@@ -183,15 +184,64 @@ body {
 
 
 
-
+/* 
 .provider-ip {
     display: none !important;
 }
 
 .provider-uuid {
     display: none !important;
-}
+} */
 
 .hidden {
     display: none !important;
 }
+
+.toggle-swtich {
+    position: relative;
+    display: flex;
+    width: 48px;
+    height: 24px;
+
+}
+
+.toggle-swtich input {
+    display: none;
+}
+
+.toggle-switch-slider {
+    /* position: absolute; */
+    align-items: center;
+    /* justify-content: center; */
+    display: flex;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg);
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 8px;
+}
+
+.toggle-switch-slider::before {
+    margin: 5px;
+    display: flex;
+    content: "";
+    height: 75%;
+    /* width: 1rem; */
+    aspect-ratio: 1/1;
+    background-color: var(--ac2);
+    transition: .2s;
+    border-radius: 8px;
+}
+
+
+.toggle-swtich input:checked + .toggle-switch-slider {
+    background-color: var(--ac1);
+}
+
+.toggle-swtich input:checked + .toggle-switch-slider::before {
+    /* Idk where the 3px comes from */
+    transform: translateX(calc(100% + 3px));
+}
+
