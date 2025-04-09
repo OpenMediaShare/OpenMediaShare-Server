@@ -12,6 +12,13 @@ declare global {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             set: (key,value) => any
         }
+        plugins: {
+            getPluginList: () => PluginInfo[],
+            getPluginConfig: (index) => PluginInfo['configBuilder']
+        }
+        callbacks: {
+            clientUpdate: (callback: (clients: Client[]) => void) => void
+        }
     }
 
     enum WinControls {
@@ -39,19 +46,22 @@ declare global {
     }
 
     interface PluginModules { electron, infoStore, express }
+
+    interface PluginInfo {
+        name: string,
+        author: string,
+        configBuilder: configBuilder,
+        version?: string,
+        description?: string
+        isRunning: boolean
+    }
+
     interface FSPlugin {
         start: (PluginModules, pluginConfigHelper, TypedEventEmitter) => void,
         stop: () => void,
         infoUpdate: (PluginModules, VideoMetadata, pluginConfigHelper) => void,
         stateUpdate: (PluginModules, PlayerState, pluginConfigHelper) => void
-        info: {
-            name: string,
-            author: string,
-            configBuilder: configBuilder,
-            version?: string,
-            description?: string
-            isRunning: boolean
-        }
+        info: PluginInfo
     }
 
 

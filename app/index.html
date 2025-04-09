@@ -8,6 +8,19 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <template id="provider-tenplate">
+        <div class="provider">
+            <div class="provider-image"><img></div>
+            <div class="provider-state"><span class="material-symbols-rounded">play_arrow</span></div>
+            <div class="provider-name"><p>Spicetify Client</p></div>
+            <div class="provider-current-title"><p>KAMELEON<br>Kami Kehoe</p></div>
+            <div class="provider-service"><p>spicetify</p></div>
+            <div class="provider-ip"><p>::1</p></div>
+            <div class="provider-uuid"><p>b171afd2-5741-462f-87d2-53a928de8676</p></div>
+        </div>
+    </template>
+
+
     <div class="content">
         <div class="sidebar">
             <div class="sidebar-button active-sidebar-button" id="home">
@@ -26,6 +39,9 @@
             </div>
         </div>
 
+
+        
+
         <div class="page home-content active-page" id="home-content">
             <div class="provider provider-header">
                 <div class="provider-image"><p>Image</p></div>
@@ -36,15 +52,10 @@
                 <div class="provider-ip"><p>IP</p></div>
                 <div class="provider-uuid"><p>UUID</p></div>
             </div>
-            <div class="provider">
-                <div class="provider-image"><p>image</p></div>
-                <div class="provider-state"><span class="material-symbols-rounded">play_arrow</span></div>
-                <div class="provider-name"><p>Spicetify Client</p></div>
-                <div class="provider-current-title"><p>KAMELEON<br>Kami Kehoe</p></div>
-                <div class="provider-service"><p>spicetify</p></div>
-                <div class="provider-ip"><p>::1</p></div>
-                <div class="provider-uuid"><p>b171afd2-5741-462f-87d2-53a928de8676</p></div>
+            <div id="provider-table">
+                
             </div>
+
         </div>
 
         <div class="page plugins-content" id="plugins-content">

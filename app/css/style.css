@@ -1,13 +1,29 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 :root {
-    --fg: #a9b1d6;
+    /* --fg: #a9b1d6;
     --bg: #1f2335;
     --bg2: #24283b;
     --bg3: #3b4261;
     --ac1: #7dcfff;
     --ac2: #7aa2f7;
-    --ac3: #3d59a1;
+    --ac3: #3d59a1; */
+
+    --fg: #a9b1d6;
+    --bg: #101014; 
+    --bg2: #1a1b26;
+    --bg3: #22222f;
+    --ac1: #612aa0;
+    --ac2: #8162a5;
+    --ac3: #16161e; 
+    
+    /* --fg: #a9b1d6;
+    --bg: #1f2335;
+    --bg2: #24283b;
+    --bg3: #3b4261;
+    --ac1: #711ad4;
+    --ac2: #8b42dd;
+    --ac3: #4e2d73; */
 }
 
 .material-symbols-rounded {
@@ -118,9 +134,25 @@ body {
     overflow-x: hidden;
 }
 
+
 .provider-header {
     background-color: var(--bg2);
     margin-bottom: 0px;
+}
+
+.provider-image {
+    height: 100%;
+    /* width: 100%; */
+    max-width: 125px;
+}
+
+.provider-image img {
+    height: 100%;
+    /* width: 100%; */
+}
+
+.provider-state {
+    max-width: 64px;
 }
 
 .provider div {
@@ -149,32 +181,8 @@ body {
     margin: 0px;
 }
 
-/*
-.provider-current-title {
-    flex-grow: 2 !important;
-}
 
-.provider-image {
-    background-color: yellow;
-}
 
-.provider-state {
-    background-color: yellow;
-}
-
-.provider-name {
-    background-color: yellow;
-}
-
-.provider-current-title {
-    background-color: yellow;
-}
-
-.provider-service {
-    background-color: yellow;
-}
-
-*/
 
 .provider-ip {
     display: none !important;

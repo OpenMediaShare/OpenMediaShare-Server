@@ -1,5 +1,9 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-//@ts-nocheck
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, prefer-const
+const providerTenplate = document.getElementById('provider-tenplate');
+const providerTable = document.getElementById('provider-table');
+
+let clients: Client[] = [];
 
 for(const el of document.getElementsByClassName('sidebar-button')) {
     el.addEventListener('click', (e) => {
@@ -20,6 +24,115 @@ for(const el of document.getElementsByClassName('sidebar-button')) {
         lastActivePage.classList.remove('active-page');
         newActivePage.classList.add('active-page');
     });
+}
+
+window.callbacks.clientUpdate((_clients) => {
+    if (clients.length == 0) {
+        console.log('No Presaved Clients. Full Render');
+        console.log(_clients);
+        clients = _clients;
+        clients.forEach(client => drawNewClient(client));
+        return;
+    }
+    console.log('Using cached clients.');
+
+
+
+    const clientsUUID = clients.map(c => c.uuid);
+    const _clientsUUID = _clients.map(c => c.uuid);
+
+    const sameClients = clients.filter(c => _clients.map(c => c.uuid).includes(c.uuid));
+    const newClients = _clients.filter(c => !clients.map(c => c.uuid).includes(c.uuid));
+    const removedClients = clients.filter(c => !_clients.map(c => c.uuid).includes(c.uuid));
+
+
+    if (newClients.length == 0 && removedClients.length == 0) {
+        // console.log('No clients changed, updateing existing clients.');
+        // console.log(`Same Clients: ${sameClients.map(c => c.uuid).join(', ')}`);
+        for (const client of sameClients) {
+            updateExistingClient(client);
+        }
+
+    } else if (newClients.length > 0 && removedClients.length == 0) {
+        // console.log('New clients detected, adding client nodes to table.');
+        // console.log(`New Clients: ${newClients.map(c => c.uuid).join(', ')}`);
+        for (const client of newClients) {
+            drawNewClient(client);
+        }
+    } else if (newClients.length == 0 && removedClients.length > 0){
+        // console.log('Clients removed, removing client nodes from table.');
+        // console.log(`Removed Clients: ${removedClients.map(c => c.uuid).join(', ')}`);
+        for (const client of removedClients) {
+            removeClient(client);
+        }
+    }
+
+    clients = _clients;
+});
+
+function getStateIcon(playerState: PlayerState) {
+    switch (playerState) {
+    case 'playing':
+        return 'play_arrow';
+        break;
+    case 'paused':
+        return 'pause';
+        break;
+    case 'unknown':
+        return 'question_mark';
+        break;
+    }
+}
+
+
+
+function removeClient(client: Client) {
+    const el = providerTable.querySelector(`#${client.uuid}`);
+    if (el == null){
+        console.error(`removeClient failed with error. ${client.uuid} was not found well trying to update it. Ignoring.`);
+        return;
+    }
+    el.remove();
+}
+
+function updateExistingClient(client: Client) {
+    const el = providerTable.querySelector(`#${client.uuid}`);
+    if (el == null){
+        console.error(`UpdateExistingClient failed with error. ${client.uuid} was not found well trying to update it. Creating new element`);
+        drawNewClient(client);
+        return;
+    }
+    // [WaterWolf5918] Client name, service, and uuid should never change so we don't update them. 
+    //     I swear if someone makes a provider that changes one of them I'm going to lose it. 
+
+    // [WaterWolf5918] Update ip if it has changed. It shouldn't most of the time...
+    const elIP = (el.querySelector('.provider-ip p') as HTMLParagraphElement);
+    if (elIP.innerText !== client.ip) {elIP.innerText == client.ip;}
+    // [WaterWolf5918] Only try to update it if the title has changed.
+    const elTitle = (el.querySelector('.provider-current-title p') as HTMLParagraphElement);
+    if (elTitle.innerText !== client.clientInfo.title) {
+        (el.querySelector('.provider-image img')       as HTMLImageElement).src           = client.clientInfo.thumbnail ?? './YTlogo4.png' ;
+        (el.querySelector('.provider-state span')      as HTMLSpanElement).innerText      = getStateIcon(client.clientInfo.playerState ?? 'unknown');
+        (el.querySelector('.provider-current-title p') as HTMLParagraphElement).innerText = client.clientInfo.title;
+    }
+}
+
+
+function drawNewClient(client: Client) {
+    // [WaterWolf5918] Bandaid fix for Node not having methods it should in this case 
+    const newEl = ((providerTenplate as HTMLTemplateElement).content.cloneNode(true) as HTMLDivElement);
+    newEl.querySelector('.provider').id = client.uuid;
+    (newEl.querySelector('.provider-image img')       as HTMLImageElement).src           = client.clientInfo.thumbnail ?? './YTlogo4.png' ;
+    (newEl.querySelector('.provider-state span')      as HTMLSpanElement).innerText      = getStateIcon(client.clientInfo.playerState ?? 'unknown');
+    (newEl.querySelector('.provider-name p')          as HTMLParagraphElement).innerText = client.name;
+    (newEl.querySelector('.provider-current-title p') as HTMLParagraphElement).innerText = client.clientInfo.title;
+    // [WaterWolf5918] Might be hidden in the future
+    (newEl.querySelector('.provider-service p')       as HTMLParagraphElement).innerText = client.service; 
+    //  [WaterWolf5918] Only shown if debugging is enabled 
+    (newEl.querySelector('.provider-ip p')            as HTMLParagraphElement).innerText = client.ip;
+    (newEl.querySelector('.provider-uuid p')          as HTMLParagraphElement).innerText = client.uuid;
+    
+    providerTable.appendChild(newEl);
 }
 
 // const configSettings = [
