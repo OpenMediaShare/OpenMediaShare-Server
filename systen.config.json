@@ -1,5 +1,5 @@
 {
-    "label": true,
+    "label": false,
     "debug": false,
     "webDisplayIPs": false,
     "webDisplayUUIDs": false

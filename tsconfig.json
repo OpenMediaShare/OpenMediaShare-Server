@@ -13,7 +13,8 @@
                 "node_modules/*"
             ]
         },
-        "target": "ES6"
+        "target": "ES6",
+        "lib": ["ES2024","DOM","DOM.Iterable"]
     },
     "include": [
         "src/**/*"

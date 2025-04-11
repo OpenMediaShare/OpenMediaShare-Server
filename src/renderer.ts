@@ -97,7 +97,7 @@ function getStateIcon(playerState: PlayerState) {
 
 
 function removeClient(client: Client) {
-    const el = providerTable.querySelector(`#${client.uuid}`);
+    const el = providerTable.querySelector(`#u${client.uuid}`);
     if (el == null){
         console.error(`removeClient failed with error. ${client.uuid} was not found well trying to update it. Ignoring.`);
         return;
@@ -106,7 +106,7 @@ function removeClient(client: Client) {
 }
 
 function updateExistingClient(client: Client) {
-    const el = providerTable.querySelector(`#${client.uuid}`);
+    const el = providerTable.querySelector(`#u${client.uuid}`);
     if (el == null){
         console.error(`UpdateExistingClient failed with error. ${client.uuid} was not found well trying to update it. Creating new element`);
         drawNewClient(client);
@@ -131,7 +131,7 @@ function updateExistingClient(client: Client) {
 function drawNewClient(client: Client) {
     // [WaterWolf5918] Bandaid fix for Node not having methods it should in this case 
     const newEl = ((providerTenplate as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment);
-    newEl.querySelector('.provider').id = client.uuid;
+    newEl.querySelector('.provider').id = `u${client.uuid}`;
     (newEl.querySelector('.provider-image img')       as HTMLImageElement).src           = client.clientInfo.thumbnail ?? './YTlogo4.png' ;
     (newEl.querySelector('.provider-state span')      as HTMLSpanElement).innerText      = getStateIcon(client.clientInfo.playerState ?? 'unknown');
     (newEl.querySelector('.provider-name p')          as HTMLParagraphElement).innerText = client.name;
