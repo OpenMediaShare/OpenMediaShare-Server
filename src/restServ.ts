@@ -1,6 +1,6 @@
 import express from 'express';
 import http from 'http';
-import bodyParser = require('body-parser');
+import bodyParser from 'body-parser';
 
 import { authManager, configStore, store } from './main';
 import { WebSocketServer } from 'ws';
@@ -71,7 +71,13 @@ webServer.use((req, res, next) => {
     // Hot Reload!, add client without posting /openSession
     if(authManager.activeClient === null) {
         logger.dinfo(['WebServ','Middleware'],'No Active Client, using received without checking to see if client exists(this will most likely end up fucking me over later :skull:) ');
-        authManager.addClient(req.body.auth);
+        if (authManager.clientExistByUUID(req.body.auth.uuid)){
+            logger.dwarn(['WebServ','Middleware'],'Client exists, not creating new one (This should not fuck me over like the above. :3)');
+            authManager.setActive(req.body.auth);
+        } else {
+            authManager.addClient(req.body.auth);
+        }
+
     } else {
         logger.dinfo(['WebServ','Middleware'],'Active Client, add new client but don\'t make them active.');
 
@@ -79,6 +85,12 @@ webServer.use((req, res, next) => {
         if (uuidList.includes(req.body.auth.uuid)){ next(); return;}
         authManager.addClientSilent(req.body.auth);
     }
+    if (req.body.time !== undefined && req.body.auth !== undefined){
+        logger.dinfo(['WebServ','Middleware'],'Updateing Client Info');
+
+        authManager.updateClient(req.body,req.ip);
+    }
+
     next();
     return;
 });
@@ -111,6 +123,7 @@ webServer.delete('/api/auth/closeSession',(req,res) => {
 
 webServer.post('/api/auth/main',(req,res) => {
     // if(req.body.auth.uuid == authManager.activeClient.uuid) {res.sendStatus(200); return;}
+    if (!authManager.clientExistByUUID(req.body.auth.uuid)) return;
     authManager.setActive(req.body.auth);
     res.sendStatus(200);
 });
@@ -126,7 +139,7 @@ webServer.get('/api/auth/main',(req,res) => {
 webServer.post('/api/media/all',(req,res) => {
     logger.dinfo(['WebServ','Middleware','UUID-Compare'],`${req.body.auth.uuid} =!= ${authManager.activeClient.uuid}`);
 
-    authManager.updateClient(req.body.auth.uuid,req.body,req.ip);
+    authManager.updateClient(req.body,req.ip);
     if(req.body.auth.uuid !== authManager.activeClient.uuid) {
         res.sendStatus(200);
         return;

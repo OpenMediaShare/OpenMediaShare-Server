@@ -1,8 +1,8 @@
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 if (require('electron-squirrel-startup')) process.exit();
 import path from 'path';
 import * as positron from './positron';
 import { app, BrowserWindow, dialog, ipcMain, Tray } from 'electron';
-import { ConfigHelper } from './utils';
 import { InfoStore } from './infoStore';
 import { restSetup } from './restServ';
 import { networkInterfaces } from 'os';
@@ -90,7 +90,7 @@ function createWindow() {
     if (!tray) { positron.createBasicTray(tray, Mainwindow); }
 
     Mainwindow.on('close', (e) => {
-        WindowCloseState ? console.log() : e.preventDefault();
+        if (WindowCloseState) e.preventDefault();
         dialog.showMessageBox(positron.closedialogSettings).then(async (result) => {
             // logger.derror([''],result.checkboxChecked.toString());
             if (result.response) {
@@ -112,15 +112,15 @@ ipcMain.handle('forceRefresh', () => {
     Mainwindow.reload();
 });
 
-ipcMain.handle('getConfigBuilder',(_event, key) => {
+ipcMain.handle('getConfigBuilder',() => {
     return configBuilder;
 });
 
-ipcMain.handle('getConfigKey',(_event, key) => {
+ipcMain.handle('getConfigKey',(event, key) => {
     return configStore.get(key);
 });
 
-ipcMain.handle('setConfigKey',(_event, key,value) => {
+ipcMain.handle('setConfigKey',(event, key,value) => {
     logger.info(['Main','Settings'],`Set Option "${key}" to "${value}"`);
     return configStore.set(key,value);
 });
@@ -133,7 +133,7 @@ ipcMain.handle('getPluginConfig',(_event,index) => {
     return pluginManager.plugins[index].info.configBuilder;
 });
 
-ipcMain.handle('setPluginConfig',(_event,index,config) => {
+ipcMain.handle('setPluginConfig',() => {
     // return pluginManager.plugins[index].info.configBuilder;
     throw new Error('Not Added Yet.');
 });

@@ -1,5 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, prefer-const
 const providerTenplate = document.getElementById('provider-tenplate');
 const providerTable = document.getElementById('provider-table');
 
@@ -8,12 +6,13 @@ const settingsToggleTenplate = document.getElementById('settings-toggle-tenplate
 const config = {
     showIPS: false,
     showUUIDS: false,
+    showService: false
 };
 
 let clients: Client[] = [];
 
 for(const el of document.getElementsByClassName('sidebar-button')) {
-    el.addEventListener('click', (e) => {
+    el.addEventListener('click', () => {
         // el.id should always be equal to the the first section of the page
         // it corresponds to
 
@@ -37,9 +36,11 @@ loadWebSettings();
 renderSettings();
 
 window.callbacks.clientUpdate((_clients) => {
+    console.log('Clients:');
+    console.log([..._clients,Math.random()]);
     if (clients.length == 0) {
         console.log('No Presaved Clients. Full Render');
-        console.log(_clients);
+        
         clients = _clients;
         clients.forEach(client => drawNewClient(client));
         return;
@@ -47,31 +48,29 @@ window.callbacks.clientUpdate((_clients) => {
     console.log('Using cached clients.');
 
 
-
-    const clientsUUID = clients.map(c => c.uuid);
-    const _clientsUUID = _clients.map(c => c.uuid);
-
-    const sameClients = clients.filter(c => _clients.map(c => c.uuid).includes(c.uuid));
+    // const sameClients = clients.filter(c => _clients.map(c => c.uuid).includes(c.uuid));
+    const sameClients = _clients.filter(c => clients.map(c => c.uuid).includes(c.uuid));
     const newClients = _clients.filter(c => !clients.map(c => c.uuid).includes(c.uuid));
     const removedClients = clients.filter(c => !_clients.map(c => c.uuid).includes(c.uuid));
-
+    // console.log('Same Clients:');
+    // console.log([...sameClients,Math.random()]);
 
     if (newClients.length == 0 && removedClients.length == 0) {
-        // console.log('No clients changed, updateing existing clients.');
-        // console.log(`Same Clients: ${sameClients.map(c => c.uuid).join(', ')}`);
+        console.log('No clients changed, updateing existing clients.');
+        console.log(`Same Clients: ${sameClients.map(c => c.uuid).join(', ')}`);
         for (const client of sameClients) {
             updateExistingClient(client);
         }
 
     } else if (newClients.length > 0 && removedClients.length == 0) {
-        // console.log('New clients detected, adding client nodes to table.');
-        // console.log(`New Clients: ${newClients.map(c => c.uuid).join(', ')}`);
+        console.log('New clients detected, adding client nodes to table.');
+        console.log(`New Clients: ${newClients.map(c => c.uuid).join(', ')}`);
         for (const client of newClients) {
             drawNewClient(client);
         }
     } else if (newClients.length == 0 && removedClients.length > 0){
-        // console.log('Clients removed, removing client nodes from table.');
-        // console.log(`Removed Clients: ${removedClients.map(c => c.uuid).join(', ')}`);
+        console.log('Clients removed, removing client nodes from table.');
+        console.log(`Removed Clients: ${removedClients.map(c => c.uuid).join(', ')}`);
         for (const client of removedClients) {
             removeClient(client);
         }
@@ -117,13 +116,18 @@ function updateExistingClient(client: Client) {
 
     // [WaterWolf5918] Update ip if it has changed. It shouldn't most of the time...
     const elIP = (el.querySelector('.provider-ip p') as HTMLParagraphElement);
-    if (elIP.innerText !== client.ip) {elIP.innerText == client.ip;}
+    if (elIP.innerText !== client.ip) {elIP.innerText = client.ip;}
+
+    // [WaterWolf5918] Update state if it has changed.
+    if ((el.querySelector('.provider-state span') as HTMLSpanElement).innerText !== getStateIcon(client.clientInfo?.playerState ?? 'unknown')){
+        (el.querySelector('.provider-state span') as HTMLSpanElement).innerText =   getStateIcon(client.clientInfo?.playerState ?? 'unknown');
+    }
+
     // [WaterWolf5918] Only try to update it if the title has changed.
     const elTitle = (el.querySelector('.provider-current-title p') as HTMLParagraphElement);
-    if (elTitle.innerText !== client.clientInfo.title) {
-        (el.querySelector('.provider-image img')       as HTMLImageElement).src           = client.clientInfo.thumbnail ?? './YTlogo4.png' ;
-        (el.querySelector('.provider-state span')      as HTMLSpanElement).innerText      = getStateIcon(client.clientInfo.playerState ?? 'unknown');
-        (el.querySelector('.provider-current-title p') as HTMLParagraphElement).innerText = client.clientInfo.title;
+    if (elTitle.innerText !== client.clientInfo.title || client.clientInfo.title == undefined) {
+        (el.querySelector('.provider-image img')       as HTMLImageElement).src           = client.clientInfo?.thumbnail ?? './YTlogo4.png' ;
+        (el.querySelector('.provider-current-title p') as HTMLParagraphElement).innerText = client.clientInfo?.title;
     }
 }
 
@@ -132,10 +136,10 @@ function drawNewClient(client: Client) {
     // [WaterWolf5918] Bandaid fix for Node not having methods it should in this case 
     const newEl = ((providerTenplate as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment);
     newEl.querySelector('.provider').id = `u${client.uuid}`;
-    (newEl.querySelector('.provider-image img')       as HTMLImageElement).src           = client.clientInfo.thumbnail ?? './YTlogo4.png' ;
-    (newEl.querySelector('.provider-state span')      as HTMLSpanElement).innerText      = getStateIcon(client.clientInfo.playerState ?? 'unknown');
+    (newEl.querySelector('.provider-image img')       as HTMLImageElement).src           = client.clientInfo?.thumbnail ?? './YTlogo4.png' ;
+    (newEl.querySelector('.provider-state span')      as HTMLSpanElement).innerText      = getStateIcon(client.clientInfo?.playerState ?? 'unknown');
     (newEl.querySelector('.provider-name p')          as HTMLParagraphElement).innerText = client.name;
-    (newEl.querySelector('.provider-current-title p') as HTMLParagraphElement).innerText = client.clientInfo.title;
+    (newEl.querySelector('.provider-current-title p') as HTMLParagraphElement).innerText = client.clientInfo?.title;
     // [WaterWolf5918] Might be hidden in the future
     (newEl.querySelector('.provider-service p')       as HTMLParagraphElement).innerText = client.service; 
     //  [WaterWolf5918] Only shown if debugging is enabled 
@@ -148,6 +152,9 @@ function drawNewClient(client: Client) {
     if (!config.showUUIDS) {
         (newEl.querySelector('.provider-uuid') as HTMLDivElement).classList.add('hidden');
     }
+    if (!config.showService) {
+        (newEl.querySelector('.provider-service') as HTMLDivElement).classList.add('hidden');
+    }
 
     providerTable.appendChild(newEl);
 }
@@ -158,6 +165,7 @@ async function loadWebSettings() {
 
     config.showIPS = showIPS;
     config.showUUIDS = showUUIDS;
+    config.showService = false;
     if (config.showIPS) {
         document.querySelectorAll('.provider-ip').forEach(el => el.classList.remove('hidden'));
     } else {
@@ -168,7 +176,11 @@ async function loadWebSettings() {
     } else {
         document.querySelectorAll('.provider-uuid').forEach(el => el.classList.add('hidden'));
     }
-
+    if (config.showService) {
+        document.querySelectorAll('.provider-service').forEach(el => el.classList.remove('hidden'));
+    } else {
+        document.querySelectorAll('.provider-service').forEach(el => el.classList.add('hidden'));
+    }
 }
 
 

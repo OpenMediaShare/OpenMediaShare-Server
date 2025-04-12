@@ -10,7 +10,7 @@ export class AuthManager {
         this.activeClient = null;
     }
 
-    updateClient(uuid, metadata: VideoMetadata, ip) {
+    updateClient(metadata: VideoMetadata, ip) {
         // console.log(this.clients.map(e => e.uuid == '432'));
         this.clients.forEach((client) => {
             const now = Date.now();
@@ -19,16 +19,15 @@ export class AuthManager {
             if (client.lastUpdated && (compare / 1000) > 300){
                 this.removeClientByUUID(client.uuid);
             }
-            if (client.uuid !== uuid) return;
-            // eslint-disable-next-line no-constant-condition
-            
+            if (client.uuid !== metadata.auth.uuid) return;
+
             client.lastUpdated = Date.now();
             client.ip = ip;
             client.clientInfo = {
                 'creator': metadata?.data?.creator ?? client?.clientInfo?.creator ?? 'unknowm',
-                'title': metadata?.data?.title ?? client?.clientInfo?.title ?? 'unknown',
-                'thumbnail': metadata?.data?.thumbnail ?? client?.clientInfo?.thumbnail ?? 'unknown',
-                'playerState': metadata?.data?.playerState ?? 'unknown'
+                'title': metadata?.data?.title ?? client?.clientInfo?.title ??'unknown',
+                'thumbnail': metadata?.data?.thumbnail ?? client?.clientInfo?.thumbnail ?? 'YTlogo4.png',
+                'playerState': metadata?.data?.playerState ?? client?.clientInfo?.playerState ?? 'unknown'
             };
             if (Mainwindow) Mainwindow.webContents.send('clientUpdate', this.clients);
             
@@ -40,8 +39,6 @@ export class AuthManager {
             if (client.uuid !== uuid) return;
             if (!client.clientInfo) return;
             client.clientInfo.playerState = state ?? 'unknown';
-            
-            
         });
         if (Mainwindow) Mainwindow.webContents.send('clientUpdate', this.clients);
     }
@@ -51,6 +48,14 @@ export class AuthManager {
         console.log('client add:');
         console.log(`    uuid:${client.uuid}`);
         console.log(`    name:${client.name}`);
+        if (client.clientInfo == undefined) {
+            client.clientInfo = {
+                creator: 'unknown',
+                playerState: 'unknown',
+                thumbnail: 'YTlogo4.png',
+                title: 'unknown'
+            };
+        }
         this.clients.push(client);
         this.activeClient = client;
         if (!app.isReady()) return;
@@ -66,6 +71,14 @@ export class AuthManager {
 
     addClientSilent(client: Client) {
         this.clients.forEach(loopClient => {if(loopClient.uuid == client.uuid) return;});
+        if (client.clientInfo == undefined) {
+            client.clientInfo = {
+                creator: 'unknown',
+                playerState: 'unknown',
+                thumbnail: 'YTlogo4.png',
+                title: 'unknown'
+            };
+        }
         this.clients.push(client);
         if (!app.isReady()) return;
         if (Mainwindow) Mainwindow.webContents.send('clientUpdate', this.clients);
