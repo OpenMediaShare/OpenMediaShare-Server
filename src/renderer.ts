@@ -1,7 +1,11 @@
-const providerTenplate = document.getElementById('provider-tenplate');
-const providerTable = document.getElementById('provider-table');
-
 const settingsToggleTenplate = document.getElementById('settings-toggle-tenplate');
+const providerTenplate = document.getElementById('provider-tenplate');
+const pluginTenplate = document.getElementById('plugin-tenplate');
+
+const pluginsContentInner = document.getElementById('plugins-content-inner');
+const providerTable = document.getElementById('provider-table');
+const settingsPage = document.getElementById('settings-content');
+
 
 const config = {
     showIPS: false,
@@ -34,6 +38,7 @@ for(const el of document.getElementsByClassName('sidebar-button')) {
 
 loadWebSettings();
 renderSettings();
+renderPlugins();
 
 window.callbacks.clientUpdate((_clients) => {
     console.log('Clients:');
@@ -186,7 +191,7 @@ async function loadWebSettings() {
 
 
 async function renderSettings(){
-    const settingsPage = document.getElementById('settings-content');
+
     const configBuilder = await window.settings.getBuilder();
     settingsPage.innerHTML = '';
 
@@ -217,6 +222,16 @@ async function renderSettings(){
 }
 
 
+
+async function renderPlugins() {
+    const plugins = await window.plugins.getPluginList();
+    plugins.forEach(plugin => {
+        const newEl = ((pluginTenplate as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment);
+        (newEl.querySelector('.plugin-name')       as HTMLSpanElement).innerText           = plugin.name;
+        (newEl.querySelector('.plugin-desc p')       as HTMLParagraphElement).innerText           = plugin.description ?? '';
+        pluginsContentInner.appendChild(newEl);
+    });
+}
 // const configSettings = [
 //     {
 //         type: 'boolean',

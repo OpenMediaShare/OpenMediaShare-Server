@@ -1,6 +1,7 @@
 {
     "label": false,
-    "debug": true,
+    "debug": false,
     "webDisplayIPs": false,
-    "webDisplayUUIDs": false
+    "webDisplayUUIDs": false,
+    "debugNotification": false
 }

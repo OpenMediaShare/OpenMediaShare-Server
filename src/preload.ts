@@ -19,8 +19,8 @@ contextBridge.exposeInMainWorld('settings', {
     set: (key, value) => ipcRenderer.invoke('setConfigKey', key, value),
 });
 
-contextBridge.exposeInMainWorld('plugin', {
-    pluginList: () => ipcRenderer.invoke('getPluginList'),
+contextBridge.exposeInMainWorld('plugins', {
+    getPluginList: () => ipcRenderer.invoke('getPluginList'),
     getPluginConfig: (i) => ipcRenderer.invoke('getPluginConfig',i)
 });
 

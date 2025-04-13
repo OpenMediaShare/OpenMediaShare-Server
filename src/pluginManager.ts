@@ -11,24 +11,31 @@ import { TypedEventEmitterClass } from './utils';
 type PluginEvents = {
     playbackChange: [PlayerState],
     mediaChange: [VideoMetadata],
-    rawInfoUpdate: [VideoMetadata]
+    rawInfoUpdate: [VideoMetadata],
     rawPlayerStateChange: [PlayerState]
 }
 
+type LoadedPlugin = {
+    plugin: FSPlugin,
+    configManager: PluginConfigHelper,
+    eventDispatcher: TypedEventEmitterClass<PluginEvents>
+}
 
 const logger = new Logger();
 export class PluginManager {
     lastSong: string;
     pluginDir: any;
     plugins: FSPlugin[];
+    loadedPlugins: LoadedPlugin[];
     constructor(){
         this.pluginDir = path.join(homedir(),'.openMediaShare','plugins');
         if(!existsSync(this.pluginDir)) { mkdirSync(this.pluginDir,{ recursive: true }); }
         this.plugins = [];
+        this.loadedPlugins = [];
     }
 
     async startPlugins(){
-        // let consoleLogDetect = true;
+        let legacyWarned = false;
         const files = readdirSync(this.pluginDir,{ withFileTypes: true });
         const electronImport = await import('electron');
         const modules = {
@@ -51,48 +58,46 @@ export class PluginManager {
                 // @ts-expect-error This is a missing type because it doesn't exist in any new projects, and is from my miss spelling.
                 plugin.info.author = plugin.info.auther;
             }
-
+            this.plugins.push(plugin);
             logger.info(['Plugin Manager'],`Starting Plugin: ${plugin.info.name}`);
-            const oldLog = console.log;
-
-            const pluginConfigHelper = new PluginConfigHelper(plugin);
-            const pluginEventDispatcher: TypedEventEmitterClass<PluginEvents> = new TypedEventEmitterClass();
+            const loadedPlugin:LoadedPlugin = {plugin: plugin,configManager: new PluginConfigHelper(plugin),eventDispatcher: new TypedEventEmitterClass()};
 
             store.on('infoUpdated',(e) => {
-                pluginEventDispatcher.emit('rawInfoUpdate',e);
+                loadedPlugin.eventDispatcher.emit('rawInfoUpdate',e);
                 if (this.lastSong == e.data.title) return;
-                pluginEventDispatcher.emit('mediaChange',e);
+                loadedPlugin.eventDispatcher.emit('mediaChange',e);
                 this.lastSong = e.data.title;
             });
 
             store.on('playerStateChange',(e) => {
-                pluginEventDispatcher.emit('rawPlayerStateChange',e);
+                loadedPlugin.eventDispatcher.emit('rawPlayerStateChange',e);
                 if (e == undefined) return;
-                pluginEventDispatcher.emit('playbackChange',e);
+                loadedPlugin.eventDispatcher.emit('playbackChange',e);
             });
 
 
 
-            plugin.start(modules,pluginConfigHelper,pluginEventDispatcher);
-            plugin.info.isRunning = true;
-
+            plugin.start(modules,loadedPlugin.configManager,loadedPlugin.eventDispatcher);
             // check to see if infoupdate exists before calling it
             if (plugin.infoUpdate instanceof Function){
-                logger.warn(['Plugin Manager'],`Plugin ${plugin.info.name} looks to be using the v0 plugin API. Please ask ${plugin.info.author} to consider switching to the new v1 API.`);
+                if (!legacyWarned) {logger.warn(['Plugin Manager'],`Plugin ${plugin.info.name} looks to be using the v0 plugin API. Please ask ${plugin.info.author} to consider switching to the new v1 API.`);}
+                legacyWarned = true;
                 store.on('infoUpdated',(metadata) => {
-                    plugin.infoUpdate(modules,metadata,pluginConfigHelper);
+                    plugin.infoUpdate(modules,metadata,loadedPlugin.configManager);
                 });
             }
             if (plugin.stateUpdate instanceof Function){
-                logger.warn(['Plugin Manager'],`Plugin ${plugin.info.name} looks to be using the v0 plugin API. Please ask ${plugin.info.author} to consider switching to the new v1 API.`);
+                if (!legacyWarned) {logger.warn(['Plugin Manager'],`Plugin ${plugin.info.name} looks to be using the v0 plugin API. Please ask ${plugin.info.author} to consider switching to the new v1 API.`);}
+                legacyWarned = true;
                 store.on('playerStateChange',(playerState) => {
-                    plugin.stateUpdate(modules,playerState,pluginConfigHelper);
+                    plugin.stateUpdate(modules,playerState,loadedPlugin.configManager);
                 });
             }
             logger.info(['Plugin Manager'],`Started Plugin: ${plugin.info.name}`);
-            this.plugins.push(plugin);
+
+            this.loadedPlugins.push(loadedPlugin);
         }
-        if (Mainwindow) Mainwindow.webContents.send('allPluginsLoaded',this.plugins.map(p => p.info));
+        if (Mainwindow) Mainwindow.webContents.send('allPluginsLoaded',this.loadedPlugins.map(p => p.plugin.info));
     }
 
 
@@ -100,11 +105,12 @@ export class PluginManager {
 
     async stopPlugins(){
         // why were we creating a new plugin before calling stop, this wasn't doing anything for the running plugin wtf
-        this.plugins.forEach(plugin => {
-            logger.info(['Plugin Manager'],`Stopping Plugin: ${plugin.info.name}`);
-            plugin.stop();
-            logger.info(['Plugin Manager'],`Stopped Plugin: ${plugin.info.name}`);
-
+        this.loadedPlugins.forEach(lp => {
+            logger.info(['Plugin Manager'],`Stopping Plugin: ${lp.plugin.info.name}`);
+            lp.eventDispatcher.emitter.removeAllListeners();
+            lp.plugin.stop();
+            logger.info(['Plugin Manager'],`Stopped Plugin: ${lp.plugin.info.name}`);
+            this.loadedPlugins = this.loadedPlugins.filter(_lp => _lp.plugin.info.name !== lp.plugin.info.name);
         });
     }
 
@@ -135,7 +141,6 @@ export class PluginConfigHelper {
         if(!existsSync(this.configPath)){
             const json = {};
             const pages = plugin.info.configBuilder.pages;
-
             // const testPages = testPlugin.info.configBuilder.pages;
             //# condense pages into one key:value pairs 
             //## loop over each page

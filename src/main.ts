@@ -13,15 +13,7 @@ export const store = new InfoStore();
 // export const configStore = new ConfigHelper(path.join(__dirname, '../config.json'));
 const configBuilder:PluginInfo['configBuilder'] = {
     pages: {
-        General: [
-            {
-                type: 'checkbox',
-                id: 'label',
-                displayName: 'Label',
-                required: true,
-                default: true
-            }
-        ],
+
         Debug: [
             {
                 type: 'checkbox',
@@ -50,7 +42,14 @@ const configBuilder:PluginInfo['configBuilder'] = {
                 displayName: 'Show UUIDs',
                 required: true,
                 default: false
-            }
+            },
+            {
+                type: 'checkbox',
+                id: 'webDisplayService',
+                displayName: 'Show Services',
+                required: true,
+                default: false
+            },
         ]
     }
 };
@@ -82,7 +81,8 @@ function createWindow() {
         frame: true,
         autoHideMenuBar: true,
         backgroundMaterial: 'none',
-        // transparent: true,
+        minWidth: 800,
+        minHeight: 600,
         icon: path.join(__dirname, '../build', 'YTlogo4.png'),
 
     });

@@ -2,21 +2,16 @@ export { };
 import 'oms-sharedtypes';
 declare global {
     interface Window {
-        theme: {
-            setTheme: (string) => void,
-            getTheme: () => void,
-        },
         settings: {
             forceRefresh: () => void,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            get: (key) => any,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            set: (key,value) => any
-            getBuilder: () => PluginInfo['configBuilder']
+            get: (key) => Promise<any>,
+            set: (key,value) => void
+            getBuilder: () => Promise<PluginInfo['configBuilder']>
         }
         plugins: {
-            getPluginList: () => PluginInfo[],
-            getPluginConfig: (index) => PluginInfo['configBuilder']
+            getPluginList: () => Promise<PluginInfo[]>,
+            getPluginConfig: (index) => Promise<PluginInfo['configBuilder']>
         }
         callbacks: {
             clientUpdate: (callback: (clients: Client[]) => void) => void

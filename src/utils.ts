@@ -7,7 +7,7 @@ import EventEmitter from 'events';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class TypedEventEmitterClass<TEvents extends Record<string, any>> {
-    private emitter = new EventEmitter();
+    emitter = new EventEmitter();
 
     emit<TEventName extends keyof TEvents & string>(
         eventName: TEventName,
@@ -39,6 +39,8 @@ export class TypedEventEmitterClass<TEvents extends Record<string, any>> {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.emitter.once(eventName, handler as any);
     }
+
+
 
 }
 

@@ -66,6 +66,7 @@ body {
     margin-right: 8px;
     overflow-y: auto;
     overflow-x: hidden;
+    box-sizing: border-box;
 }
 
 .sidebar-button {
@@ -110,6 +111,7 @@ body {
     flex-grow: 1;
     background-color: var(--bg2);
     border-radius: 8px;
+
 }
 
 .active-page {
@@ -276,3 +278,63 @@ border-radius: 8px;
     transform: translateX(calc(100% + 3px));
 }
 
+
+
+.plugins-content-inner {
+    overflow: hidden;
+    display: flex;
+    width: 100%;
+    flex-flow: row wrap;
+    justify-content: center;
+
+}
+
+
+.plugin {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg3);
+    /* width: fit-content; */
+    height: max-content;
+    margin: 8px 8px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    /* width: 300px; */
+}
+
+
+.plugin-topbar {
+    display: flex;
+    /* flex-direction: row; */
+    align-items: center;
+    /* background: darkblue; */
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px;
+    font-size: 18px;
+}
+
+.plugin-topbar-right {
+    margin-left: 20px;
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    justify-content: end;
+    align-items: center;
+}
+
+.plugin-topbar .material-symbols-rounded {
+    margin-right: 4px;
+    font-size: 18px;
+}
+
+
+.plugin-desc {
+    padding: 6px;
+
+}
+
+.plugin-desc p {
+    font-size: 14px;
+    margin: 0px;
+}
