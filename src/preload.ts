@@ -21,7 +21,10 @@ contextBridge.exposeInMainWorld('settings', {
 
 contextBridge.exposeInMainWorld('plugins', {
     getPluginList: () => ipcRenderer.invoke('getPluginList'),
-    getPluginConfig: (i) => ipcRenderer.invoke('getPluginConfig',i)
+    getPluginConfig: (i) => ipcRenderer.invoke('getPluginConfig',i),
+    enable: (pluginName: string) => ipcRenderer.invoke('enablePlugin',pluginName),
+    disable: (pluginName: string) => ipcRenderer.invoke('disablePlugin',pluginName),
+
 });
 
 contextBridge.exposeInMainWorld('callbacks', {

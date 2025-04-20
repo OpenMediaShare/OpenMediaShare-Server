@@ -45,6 +45,7 @@ body {
     color: white;
     background-color: var(--bg);
     font-family: "Inter", sans-serif;
+    
 
     display: flex;
 }
@@ -116,15 +117,9 @@ body {
 
 .active-page {
     display: flex;
-}
-
-.home-content {
     padding: 8px;
 }
 
-.settings-content {
-    padding: 8px;
-}
 
 .provider-table {
     overflow-x: hidden;
@@ -150,6 +145,10 @@ body {
     height: 100%;
     /* max-height: 60px; */
     max-width: 125px;
+}
+
+.provider-header .provider-image { 
+    height: unset;
 }
 
 .provider-image img {
@@ -280,7 +279,7 @@ border-radius: 8px;
 
 
 
-.plugins-content-inner {
+.plugins-list {
     overflow: hidden;
     display: flex;
     width: 100%;

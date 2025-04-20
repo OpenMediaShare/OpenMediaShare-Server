@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from 'fs';
 import { homedir } from 'os';
 import path from 'path';
-
+import { Notification } from 'electron';
 import { Mainwindow, store } from './main';
 import { webServer } from './restServ';
 import { Logger } from './logger';
@@ -15,7 +15,7 @@ type PluginEvents = {
     rawPlayerStateChange: [PlayerState]
 }
 
-type LoadedPlugin = {
+type RunningPlugin = {
     plugin: FSPlugin,
     configManager: PluginConfigHelper,
     eventDispatcher: TypedEventEmitterClass<PluginEvents>
@@ -25,26 +25,75 @@ const logger = new Logger();
 export class PluginManager {
     lastSong: string;
     pluginDir: any;
+    pluginFileMappings: object;
     plugins: FSPlugin[];
-    loadedPlugins: LoadedPlugin[];
+    runningPlugins: RunningPlugin[];
     constructor(){
         this.pluginDir = path.join(homedir(),'.openMediaShare','plugins');
         if(!existsSync(this.pluginDir)) { mkdirSync(this.pluginDir,{ recursive: true }); }
         this.plugins = [];
-        this.loadedPlugins = [];
+        this.runningPlugins = [];
+        this.pluginFileMappings = {};
     }
 
-    async startPlugins(){
-        let legacyWarned = false;
-        const files = readdirSync(this.pluginDir,{ withFileTypes: true });
+    private async startPlugin(pluginName: string){
         const electronImport = await import('electron');
         const modules = {
             electron: electronImport,
             express: webServer,
             Logger: Logger
         };
+
+        const plugin = this.plugins.find(p => p.info.name == pluginName);
+        const runningPlugin:RunningPlugin = {plugin: plugin,configManager: new PluginConfigHelper(plugin),eventDispatcher: new TypedEventEmitterClass()};
+
+        plugin.info.legacy = false;
+
+        logger.info(['Plugin Manager'],`Starting Plugin: ${plugin.info.name}`); 
+        store.on('infoUpdated',(e) => {
+            runningPlugin.eventDispatcher.emit('rawInfoUpdate',e);
+            if (this.lastSong == e.data.title) return;
+            runningPlugin.eventDispatcher.emit('mediaChange',e);
+            this.lastSong = e.data.title;
+        });
+
+        store.on('playerStateChange',(e) => {
+            runningPlugin.eventDispatcher.emit('rawPlayerStateChange',e);
+            if (e == undefined) return;
+            runningPlugin.eventDispatcher.emit('playbackChange',e);
+        });
+
+
+
+        plugin.start(modules,runningPlugin.configManager,runningPlugin.eventDispatcher);
+        // check to see if infoupdate exists before calling it
+        if (plugin.infoUpdate instanceof Function){
+            if (!plugin.info.legacy) {logger.warn(['Plugin Manager'],`Plugin ${plugin.info.name} looks to be using the v0 plugin API. Please ask ${plugin.info.author} to consider switching to the new v1 API.`);}
+
+            plugin.info.legacy = true;
+            store.on('infoUpdated',(metadata) => {
+                plugin.infoUpdate(modules,metadata,runningPlugin.configManager);
+            });
+        }
+        if (plugin.stateUpdate instanceof Function){
+            if (!plugin.info.legacy) {logger.warn(['Plugin Manager'],`Plugin ${plugin.info.name} looks to be using the v0 plugin API. Please ask ${plugin.info.author} to consider switching to the new v1 API.`);}
+
+            plugin.info.legacy = true;
+            store.on('playerStateChange',(playerState) => {
+                plugin.stateUpdate(modules,playerState,runningPlugin.configManager);
+            });
+        }
+        logger.info(['Plugin Manager'],`Started Plugin: ${plugin.info.name}`);
+
+        this.runningPlugins.push(runningPlugin);
+    }
+
+
+
+    async loadPlugins(){
+        const files = readdirSync(this.pluginDir,{ withFileTypes: true });
         for(const file of files) {
-            if (!file.isFile() || !file.name.endsWith('js')) continue;
+            if (!file.isFile() || !file.name.endsWith('js') && !file.name.endsWith('js.d')) continue;
             logger.info(['Plugin Manager'],`Importing Plugin: ${file.name}`);
             const plugin: FSPlugin = await import(path.join(this.pluginDir,file.name)); 
 
@@ -52,66 +101,93 @@ export class PluginManager {
                 logger.warn(['Plugin Manager'],`File ${file.name} isn't a vaild plugin, Skipping. `);
                 return;
             }
-            // Fix for my bad spelling, i'm sorry :(
+            // Fix for my bad spelling, I'm sorry :(
             // @ts-expect-error This is a missing type because it doesn't exist in any new projects, and is from my miss spelling.
             if (plugin.info.auther) {
                 // @ts-expect-error This is a missing type because it doesn't exist in any new projects, and is from my miss spelling.
                 plugin.info.author = plugin.info.auther;
             }
+
+
+
+            if (this.plugins.map(p => p.info.name).includes(plugin.info.name)){
+                logger.error(['Plugin Manager'],`Duplicate plugin "${plugin.info.name}" detected! Can\`t load plugin with duplicate name.`);
+                continue;
+            }
+            this.pluginFileMappings[plugin.info.name] = file.name;
             this.plugins.push(plugin);
-            logger.info(['Plugin Manager'],`Starting Plugin: ${plugin.info.name}`);
-            const loadedPlugin:LoadedPlugin = {plugin: plugin,configManager: new PluginConfigHelper(plugin),eventDispatcher: new TypedEventEmitterClass()};
-
-            store.on('infoUpdated',(e) => {
-                loadedPlugin.eventDispatcher.emit('rawInfoUpdate',e);
-                if (this.lastSong == e.data.title) return;
-                loadedPlugin.eventDispatcher.emit('mediaChange',e);
-                this.lastSong = e.data.title;
-            });
-
-            store.on('playerStateChange',(e) => {
-                loadedPlugin.eventDispatcher.emit('rawPlayerStateChange',e);
-                if (e == undefined) return;
-                loadedPlugin.eventDispatcher.emit('playbackChange',e);
-            });
-
-
-
-            plugin.start(modules,loadedPlugin.configManager,loadedPlugin.eventDispatcher);
-            // check to see if infoupdate exists before calling it
-            if (plugin.infoUpdate instanceof Function){
-                if (!legacyWarned) {logger.warn(['Plugin Manager'],`Plugin ${plugin.info.name} looks to be using the v0 plugin API. Please ask ${plugin.info.author} to consider switching to the new v1 API.`);}
-                legacyWarned = true;
-                store.on('infoUpdated',(metadata) => {
-                    plugin.infoUpdate(modules,metadata,loadedPlugin.configManager);
-                });
+            if (file.name.endsWith('js.d')){
+                logger.info(['Plugin Manager'],`Plugin "${file.name}" is disabled`);
+                continue;
             }
-            if (plugin.stateUpdate instanceof Function){
-                if (!legacyWarned) {logger.warn(['Plugin Manager'],`Plugin ${plugin.info.name} looks to be using the v0 plugin API. Please ask ${plugin.info.author} to consider switching to the new v1 API.`);}
-                legacyWarned = true;
-                store.on('playerStateChange',(playerState) => {
-                    plugin.stateUpdate(modules,playerState,loadedPlugin.configManager);
-                });
-            }
-            logger.info(['Plugin Manager'],`Started Plugin: ${plugin.info.name}`);
+            await this.startPlugin(plugin.info.name);
 
-            this.loadedPlugins.push(loadedPlugin);
         }
-        if (Mainwindow) Mainwindow.webContents.send('allPluginsLoaded',this.loadedPlugins.map(p => p.plugin.info));
+        if (Mainwindow) Mainwindow.webContents.send('allPluginsLoaded',this.runningPlugins.map(p => p.plugin.info));
     }
 
 
 
 
+    private async stopPlugin(pluginName){
+        const runningPlugin = this.runningPlugins.find(rp => rp.plugin.info.name == pluginName);
+        logger.info(['Plugin Manager'],`Stopping Plugin: ${runningPlugin.plugin.info.name}`);
+        runningPlugin.eventDispatcher.emitter.removeAllListeners();
+        runningPlugin.plugin.stop();
+        logger.info(['Plugin Manager'],`Stopped Plugin: ${runningPlugin.plugin.info.name}`);
+        this.runningPlugins = this.runningPlugins.filter(_rp => _rp.plugin.info.name !== runningPlugin.plugin.info.name);
+    }
+
     async stopPlugins(){
-        // why were we creating a new plugin before calling stop, this wasn't doing anything for the running plugin wtf
-        this.loadedPlugins.forEach(lp => {
-            logger.info(['Plugin Manager'],`Stopping Plugin: ${lp.plugin.info.name}`);
-            lp.eventDispatcher.emitter.removeAllListeners();
-            lp.plugin.stop();
-            logger.info(['Plugin Manager'],`Stopped Plugin: ${lp.plugin.info.name}`);
-            this.loadedPlugins = this.loadedPlugins.filter(_lp => _lp.plugin.info.name !== lp.plugin.info.name);
+        this.runningPlugins.forEach(lp => {
+            this.stopPlugin(lp);
         });
+    }
+
+    async enablePlugin(pluginName: string){
+        console.log(pluginName);
+        const legacy = this.plugins.find(p => p.info.name == pluginName).info.legacy;
+        if (!this.plugins.map(p => p.info.name).includes(pluginName) ) {
+            logger.error(['PluginManager'],'Tried to start a plugin that isn\'t loaded.');
+            return;
+        }
+        if (this.runningPlugins.map(p => p.plugin.info.name).includes(pluginName) && !legacy) {
+            logger.warn(['PluginManager'],'Tried to enable plugin that is already running') ;
+            return;
+        }
+
+        renameSync(path.join(this.pluginDir,this.pluginFileMappings[pluginName]),path.join(this.pluginDir,this.pluginFileMappings[pluginName].replace('.d','')));
+        this.pluginFileMappings[pluginName] = this.pluginFileMappings[pluginName].replace('.d','');
+        if (legacy) return;
+        this.startPlugin(pluginName);
+    }
+
+    disablePlugin(pluginName: string){
+        if (!this.plugins.map(p => p.info.name).includes(pluginName)) {
+            logger.error(['PluginManager'],'Tried to stop a plugin that isn\'t loaded. How did the plugin start?');
+            return;
+        }
+        if (!this.runningPlugins.map(p => p.plugin.info.name).includes(pluginName)) {
+            logger.warn(['PluginManager'],'Tried to disable plugin that isn\'t running.') ;
+            return;
+        }
+
+
+        renameSync(path.join(this.pluginDir,this.pluginFileMappings[pluginName]),path.join(this.pluginDir,`${this.pluginFileMappings[pluginName]}.d`));
+        this.pluginFileMappings[pluginName] = `${this.pluginFileMappings[pluginName]}.d`;
+        if(this.plugins.find(p => p.info.name == pluginName).info.legacy){
+            logger.error(['PluginManager'],'Legacy plugins do not support live starting or stopping.');
+            if (Mainwindow) {
+                new Notification({
+                    urgency: 'critical',
+                    title: '⚠️ Plugin Toggle Note',
+                    body: 'Legacy plugins do not support live stopping.\n\nThis plugin will be disabled next time you restart OpenMediaShare.'
+                }).show();
+            }
+            return;
+        }
+
+        this.stopPlugin(pluginName);
     }
 
 }

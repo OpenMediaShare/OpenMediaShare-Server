@@ -10,8 +10,10 @@ declare global {
             getBuilder: () => Promise<PluginInfo['configBuilder']>
         }
         plugins: {
-            getPluginList: () => Promise<PluginInfo[]>,
+            getPluginList: () => Promise<{all: PluginInfo[], loaded: PluginInfo[]}>,
             getPluginConfig: (index) => Promise<PluginInfo['configBuilder']>
+            enable: (pluginName: string) => void
+            disable: (pluginName: string) => void
         }
         callbacks: {
             clientUpdate: (callback: (clients: Client[]) => void) => void
@@ -51,6 +53,7 @@ declare global {
         version?: string,
         description?: string
         isRunning: boolean
+        legacy?: boolean
     }
 
     interface FSPlugin {

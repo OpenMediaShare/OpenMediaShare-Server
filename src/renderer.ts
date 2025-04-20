@@ -2,7 +2,8 @@ const settingsToggleTenplate = document.getElementById('settings-toggle-tenplate
 const providerTenplate = document.getElementById('provider-tenplate');
 const pluginTenplate = document.getElementById('plugin-tenplate');
 
-const pluginsContentInner = document.getElementById('plugins-content-inner');
+const pluginsListEl = document.getElementById('plugins-list');
+
 const providerTable = document.getElementById('provider-table');
 const settingsPage = document.getElementById('settings-content');
 
@@ -118,7 +119,7 @@ function updateExistingClient(client: Client) {
     }
     // [WaterWolf5918] Client name, service, and uuid should never change so we don't update them. 
     //     I swear if someone makes a provider that changes one of them I'm going to lose it. 
-
+    
     // [WaterWolf5918] Update ip if it has changed. It shouldn't most of the time...
     const elIP = (el.querySelector('.provider-ip p') as HTMLParagraphElement);
     if (elIP.innerText !== client.ip) {elIP.innerText = client.ip;}
@@ -225,11 +226,25 @@ async function renderSettings(){
 
 async function renderPlugins() {
     const plugins = await window.plugins.getPluginList();
-    plugins.forEach(plugin => {
+    plugins.all.forEach(plugin => {
         const newEl = ((pluginTenplate as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment);
         (newEl.querySelector('.plugin-name')       as HTMLSpanElement).innerText           = plugin.name;
         (newEl.querySelector('.plugin-desc p')       as HTMLParagraphElement).innerText           = plugin.description ?? '';
-        pluginsContentInner.appendChild(newEl);
+        const toggle = (newEl.querySelector('.plugin .toggle-swtich input')       as HTMLInputElement);
+        // if (plugin.legacy) {
+        //     toggle.disabled = true;
+        // }
+        toggle.checked = plugins.loaded.map(p => p.name).includes(plugin.name);
+        toggle.addEventListener('input',() => {
+            console.log(toggle.checked);
+            if (toggle.checked){
+                window.plugins.enable(plugin.name);
+            } else {
+                window.plugins.disable(plugin.name);
+            }
+        });
+        
+        pluginsListEl.appendChild(newEl);
     });
 }
 // const configSettings = [

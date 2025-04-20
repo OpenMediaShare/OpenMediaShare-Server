@@ -116,21 +116,25 @@ ipcMain.handle('getConfigBuilder',() => {
     return configBuilder;
 });
 
-ipcMain.handle('getConfigKey',(event, key) => {
+ipcMain.handle('getConfigKey',(_event, key) => {
     return configStore.get(key);
 });
 
-ipcMain.handle('setConfigKey',(event, key,value) => {
+ipcMain.handle('setConfigKey',(_event, key,value) => {
     logger.info(['Main','Settings'],`Set Option "${key}" to "${value}"`);
     return configStore.set(key,value);
 });
 
 ipcMain.handle('getPluginList',() => {
-    return pluginManager.plugins.map(p => p.info);
+    return {all: pluginManager.plugins.map(p => p.info), loaded: pluginManager.runningPlugins.map(p => p.plugin.info)};
 });
 
-ipcMain.handle('getPluginConfig',(_event,index) => {
-    return pluginManager.plugins[index].info.configBuilder;
+ipcMain.handle('enablePlugin',(_event,pluginName) => {
+    pluginManager.enablePlugin(pluginName);
+});
+
+ipcMain.handle('disablePlugin',(_event,pluginName) => {
+    pluginManager.disablePlugin(pluginName);
 });
 
 ipcMain.handle('setPluginConfig',() => {
@@ -145,7 +149,7 @@ app.whenReady().then(() => {
         Mainwindow.webContents.send('infoUpdate', store.info);
     });
     logger.info(['Plugin Manager'],'Starting Plugins');
-    pluginManager.startPlugins();
+    pluginManager.loadPlugins();
 
 });
 
