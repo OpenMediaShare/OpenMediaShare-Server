@@ -21,6 +21,7 @@
     </template>
 
     <template id="settings-toggle-tenplate">
+
         <div class="settings-option">
             <p class="settings-label">label</p>
             <label class="toggle-swtich">
@@ -35,7 +36,7 @@
             <div class="plugin-topbar">
                 <span class="plugin-name">Very advanced plugin</span>
                 <div class="plugin-topbar-right">
-                    <span class="material-symbols-rounded">settings</span>
+                    <span class="material-symbols-rounded plugin-settings-btn">settings</span>
                     <label class="toggle-swtich">
                         <input type="checkbox">
                         <span class="toggle-switch-slider"></span>
@@ -52,6 +53,11 @@
 
     <div class="content">
         <div class="sidebar">
+            <div class="sidebar-button hidden" id="back">
+                <span class="material-symbols-rounded">undo</span>
+                <p>Back</p>
+            </div>
+
             <div class="sidebar-button active-sidebar-button" id="home">
                 <span class="material-symbols-rounded">home</span>
                 <p>Home</p>
@@ -88,7 +94,7 @@
             <div id="plugins-list" class="plugins-list">
 
             </div>
-            <div id="plugins-settings" class="plugins-list">
+            <div id="plugin-settings" class="settings-content">
 
             </div>
         </div>

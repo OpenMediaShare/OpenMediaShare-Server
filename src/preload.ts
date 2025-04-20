@@ -24,7 +24,10 @@ contextBridge.exposeInMainWorld('plugins', {
     getPluginConfig: (i) => ipcRenderer.invoke('getPluginConfig',i),
     enable: (pluginName: string) => ipcRenderer.invoke('enablePlugin',pluginName),
     disable: (pluginName: string) => ipcRenderer.invoke('disablePlugin',pluginName),
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    get: (pluginName: string, key: string) => ipcRenderer.invoke('getPluginKey',pluginName,key),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    set: (pluginName: string, key: string, value) => ipcRenderer.invoke('setPluginKey',pluginName,key,value)
 });
 
 contextBridge.exposeInMainWorld('callbacks', {

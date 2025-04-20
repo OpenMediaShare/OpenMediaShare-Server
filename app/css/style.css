@@ -34,6 +34,7 @@
   'opsz' 24;
 
   font-size: 36px;
+  user-select: none;
 }
 
 body {
@@ -58,6 +59,7 @@ body {
 }
 
 .sidebar {
+    /* height: fit-content; */
     width: 100px;
     background-color: var(--ac3);
     display: flex;
@@ -68,6 +70,8 @@ body {
     overflow-y: auto;
     overflow-x: hidden;
     box-sizing: border-box;
+
+
 }
 
 .sidebar-button {
@@ -200,6 +204,14 @@ border-radius: 8px;
     height: 10px;
 }
 
+.settings-title {
+    font-size: 32px;
+    font-weight: 800;
+    height: 10px;
+    margin: 10px 0px 50px 0px;
+
+}
+
 .settings-option {
     display: flex;
     padding: 4px;
@@ -208,6 +220,7 @@ border-radius: 8px;
     margin-bottom: 8px;
     align-items: center;
 }
+
 
 .settings-label {
     flex-grow: 1;
@@ -224,6 +237,8 @@ border-radius: 8px;
 .provider-uuid {
     display: none !important;
 } */
+
+
 
 .hidden {
     display: none !important;
@@ -327,6 +342,10 @@ border-radius: 8px;
     font-size: 18px;
 }
 
+.plugin-settings-btn:hover {
+    color: var(--ac2);
+}
+
 
 .plugin-desc {
     padding: 6px;
@@ -336,4 +355,36 @@ border-radius: 8px;
 .plugin-desc p {
     font-size: 14px;
     margin: 0px;
+}
+
+.sidebar .slideDown {
+    height: fit-content;
+}
+
+.sidebar .slideUp {
+    height: fit-content;
+}
+
+
+
+
+.slideDown {
+    animation: slideUp 0.25s ease-out 1 reverse;
+}
+
+
+.slideUp {
+    animation: slideUp 0.25s ease-out 1;
+}
+
+
+@keyframes slideUp {
+    0% {
+        height: 75px;
+    }
+
+    100% {
+        height: 0px;
+        transform: translate(0px, -100px);
+    }
 }

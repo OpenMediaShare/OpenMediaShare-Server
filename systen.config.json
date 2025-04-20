@@ -3,5 +3,6 @@
     "debug": false,
     "webDisplayIPs": false,
     "webDisplayUUIDs": false,
-    "debugNotification": false
+    "debugNotification": false,
+    "webDisplayService": false
 }

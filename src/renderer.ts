@@ -3,10 +3,12 @@ const providerTenplate = document.getElementById('provider-tenplate');
 const pluginTenplate = document.getElementById('plugin-tenplate');
 
 const pluginsListEl = document.getElementById('plugins-list');
+const pluginsSettingsEl = document.getElementById('plugin-settings');
 
 const providerTable = document.getElementById('provider-table');
 const settingsPage = document.getElementById('settings-content');
 
+const backBtn = document.getElementById('back');
 
 const config = {
     showIPS: false,
@@ -20,6 +22,13 @@ for(const el of document.getElementsByClassName('sidebar-button')) {
     el.addEventListener('click', () => {
         // el.id should always be equal to the the first section of the page
         // it corresponds to
+        
+        // [WaterWolf5918] handle plugin settings back
+        if (el.id == 'back') return;
+        pluginsSettingsEl.innerHTML = '';
+        pluginsListEl.classList.remove('hidden');
+        backBtn.classList.add('hidden');
+
 
         const lastActive    = document.querySelector('.active-sidebar-button') as HTMLDivElement;
         const newActive     = document.getElementById(el.id);
@@ -38,7 +47,7 @@ for(const el of document.getElementsByClassName('sidebar-button')) {
 }
 
 loadWebSettings();
-renderSettings();
+renderGlobalSettings();
 renderPlugins();
 
 window.callbacks.clientUpdate((_clients) => {
@@ -168,10 +177,10 @@ function drawNewClient(client: Client) {
 async function loadWebSettings() {
     const showIPS = await window.settings.get('webDisplayIPs');
     const showUUIDS = await window.settings.get('webDisplayUUIDs');
-
+    const showService = await window.settings.get('webDisplayService');
     config.showIPS = showIPS;
     config.showUUIDS = showUUIDS;
-    config.showService = false;
+    config.showService = showService;
     if (config.showIPS) {
         document.querySelectorAll('.provider-ip').forEach(el => el.classList.remove('hidden'));
     } else {
@@ -190,19 +199,54 @@ async function loadWebSettings() {
 }
 
 
+async function renderGlobalSettings() {
+    // [WaterWolf5918] We have to wrap this in another function because you can't use await in the global scope.
+    renderSettingsPage(settingsPage, await window.settings.getBuilder());
+}
 
-async function renderSettings(){
+async function renderPluginSettings(plugin: PluginInfo) {
 
-    const configBuilder = await window.settings.getBuilder();
-    settingsPage.innerHTML = '';
+    backBtn.classList.add('slideDown');
+    setTimeout(() => {
+        backBtn.classList.remove('slideDown');
+    },250);
+    backBtn.classList.remove('hidden');
+    pluginsListEl.classList.add('hidden');
+    renderSettingsPage(pluginsSettingsEl,plugin.configBuilder,plugin.name);
+    backBtn.addEventListener('click',() => {
+        pluginsSettingsEl.innerHTML = '';
+        pluginsListEl.classList.remove('hidden');
+        backBtn.classList.add('slideUp');
+        setTimeout(() => {
+            backBtn.classList.remove('slideUp');
+            backBtn.classList.add('hidden');
+        },250);
 
-    for (const page in configBuilder.pages) { 
+    },{once: true});
+}
+
+
+async function renderSettingsPage(pageEl: HTMLElement, config: ConfigBuilder, pluginName: string = 'global'){
+    pageEl.innerHTML = '';
+    if (pluginName !== 'global'){
+        const el = document.createElement('p');
+        el.classList.add('settings-title');
+        el.innerText = pluginName;
+        pageEl.appendChild(el);
+    }
+    for (const page in config.pages) { 
         const el = document.createElement('p');
         el.classList.add('settings-category');
         el.innerText = page;
-        settingsPage.appendChild(el);
-        for (const setting of configBuilder.pages[page]){
-            const value = await window.settings.get(setting.id);
+        pageEl.appendChild(el);
+        for (const setting of config.pages[page]){
+            let value;
+            if (pluginName == 'global'){
+                value = await window.settings.get(setting.id);
+            } else {
+                value = await window.plugins.get(pluginName,setting.id);
+            }
+
             switch(setting.type) {
                 case 'checkbox': {
                     const settingsEl = ((settingsToggleTenplate as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment);
@@ -210,14 +254,18 @@ async function renderSettings(){
                     (settingsEl.querySelector('.settings-label') as HTMLParagraphElement).innerText = setting.displayName;
                     toggle.checked = (typeof value == 'boolean') ? value : false;
                     toggle.addEventListener('change',() => {
-                        window.settings.set(setting.id,toggle.checked);
-                        loadWebSettings();
+                        if (pluginName == 'global'){
+                            window.settings.set(setting.id,toggle.checked);
+                            loadWebSettings();
+                        } else {
+                            window.plugins.set(pluginName,setting.id,toggle.checked);
+                        }
+
                     });
-                    settingsPage.appendChild(settingsEl);
+                    pageEl.appendChild(settingsEl);
                     break;
                 }
             }
-
         }
     }
 }
@@ -231,9 +279,7 @@ async function renderPlugins() {
         (newEl.querySelector('.plugin-name')       as HTMLSpanElement).innerText           = plugin.name;
         (newEl.querySelector('.plugin-desc p')       as HTMLParagraphElement).innerText           = plugin.description ?? '';
         const toggle = (newEl.querySelector('.plugin .toggle-swtich input')       as HTMLInputElement);
-        // if (plugin.legacy) {
-        //     toggle.disabled = true;
-        // }
+        const settingsBtn = (newEl.querySelector('.plugin .plugin-settings-btn') as HTMLSpanElement);
         toggle.checked = plugins.loaded.map(p => p.name).includes(plugin.name);
         toggle.addEventListener('input',() => {
             console.log(toggle.checked);
@@ -244,133 +290,10 @@ async function renderPlugins() {
             }
         });
         
+        settingsBtn.addEventListener('click',() => {
+            renderPluginSettings(plugin);
+        });
+
         pluginsListEl.appendChild(newEl);
     });
 }
-// const configSettings = [
-//     {
-//         type: 'boolean',
-//         key: 'debug',
-//         title: 'Enable Debugging Logs',
-//         desc: 'Enables debug messages in the terminal and enables the debug ui on port 4949'
-//     },
-//     {
-//         type: 'boolean',
-//         key: 'debugNotification',
-//         title: 'Enable Debugging Notification',
-//         desc: 'Enables debug desktop notifications.'
-//     }
-// ];
-
-
-// const settingsPage = document.querySelector('#settings-page .grid-container');
-// configSettings.forEach(async (setting) => {
-//     const checked = await window.settings.get(setting.key);
-//     const el = document.createElement('div');
-//     el.id = setting.key;
-//     el.classList.add('plugin','settings-item');
-//     const booleanHtml = 
-//     `
-//             <div class="plugin-details">
-//                 <div class="plugin-topbar">
-//                     <span class="plugin-title">
-//                         ${setting.title ?? setting.key}
-//                     </span>
-//                     <label class="switch">
-//                         <input id="${setting.key}-checkbox" type="checkbox" ${checked ? 'checked' : ''}>
-//                         <span class="slider"></span>
-//                     </label>
-//                 </div>
-//                 <span>${setting.desc ?? 'No Desc'}</span>
-//             </div>
-
-//     `;
-    
-//     el.innerHTML = booleanHtml;
-//     settingsPage.appendChild(el);
-//     document.getElementById(`${setting.key}-checkbox`).addEventListener('click',(e) => {
-//         window.settings.set(setting.key,e.target.checked);
-//         console.log(`${setting.key}:${e.target.checked}`);
-//     });
-// });
-
-// function drawPlugins(plugins: FSPlugin['info'][]) {
-//     const pluginPage = document.getElementById('plugin-settings-grid');
-//     for (const [index,plugin] of plugins.entries()) {
-//         console.log(plugin.name);
-//         const html = `
-//         <div class="plugin-details">
-//             <div class="plugin-topbar">
-//                 <span class="plugin-title">${plugin.name}</span>
-//                 <span class="material-symbols-outlined">
-//                     settings
-//                 </span>
-//                 <label class="switch">
-//                     <input type="checkbox" checked=${plugin.isRunning}>
-//                     <span class="slider"></span>
-//                 </label>
-//             </div>
-//             <span class="plugin-author">By ${plugin.author}</span><br />
-//             <span>${plugin.description ?? ''}</span>
-//         </div>
-//     `;
-//         const pluginEl = document.createElement('div');
-//         pluginEl.id = `${index}-plugin`;
-//         pluginEl.classList.add('plugin');
-//         pluginEl.innerHTML = html;
-//         pluginPage.appendChild(pluginEl);
-
-//         (pluginEl.querySelector('.material-symbols-outlined') as HTMLSpanElement).addEventListener('click',() => {
-
-//             console.log(`${index} - ${plugin.name}`);
-//             drawPluginSettings(index);
-
-
-//         });
-//     }
-// }
-
-// function drawPluginSettings(index){
-//     const grid = document.getElementById('plugin-settings-grid');
-//     const panel = document.getElementById('plugin-settings-panel');
-//     const sidebar = document.getElementById('plugin-settings-sidebar');
-//     const backButton = document.createElement('div');
-//     backButton.classList.add('sidebar-item');
-//     backButton.id = 'plugin-tab-back';
-//     backButton.innerHTML = `
-//         <span class="material-symbols-outlined sidebar-item-icon">
-//             undo
-//         </span>
-//         Back
-//     `;
-//     sidebar.innerHTML = '';
-//     sidebar.append(backButton);
-
-//     grid.classList.add('hidden');
-//     panel.classList.remove('hidden');
-//     window.plugin.getPluginConfig(index)
-//         .then((configBuilder: FSPlugin['info']['configBuilder']) => {
-//             console.log(configBuilder);
-//             for (const page of Object.keys(configBuilder.pages)){
-//                 const button = document.createElement('div');
-//                 button.classList.add('sidebar-item');
-//                 button.id = `plugin-tab-${page}`;
-//                 button.innerText = page;
-//                 console.log(page);
-//                 sidebar.append(button);
-//                 button.addEventListener('click',() => {
-//                     const pageElements = configBuilder.pages[page];
-//                     for (const el of pageElements){
-//                         const elDiv = document.createElement('div');
-                    
-
-//                         panel.append(elDiv);
-//                     }
-//                 });
-//             }
-//         });
-// }
-
-
-// window.plugin.pluginList()
-//     .then(p => drawPlugins(p));

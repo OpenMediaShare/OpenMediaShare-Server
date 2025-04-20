@@ -121,7 +121,7 @@ ipcMain.handle('getConfigKey',(_event, key) => {
 });
 
 ipcMain.handle('setConfigKey',(_event, key,value) => {
-    logger.info(['Main','Settings'],`Set Option "${key}" to "${value}"`);
+    logger.info(['Main','Settings','IPC'],`Set Option "${key}" to "${value}"`);
     return configStore.set(key,value);
 });
 
@@ -137,10 +137,38 @@ ipcMain.handle('disablePlugin',(_event,pluginName) => {
     pluginManager.disablePlugin(pluginName);
 });
 
-ipcMain.handle('setPluginConfig',() => {
-    // return pluginManager.plugins[index].info.configBuilder;
-    throw new Error('Not Added Yet.');
+ipcMain.handle('setPluginKey',(_event,pluginName,key, value) => {
+    let cm: PluginConfigHelper;
+    if (!pluginManager.plugins.map(p => p.info.name).includes(pluginName) ) {
+        logger.error(['PluginManager','Settings'],'Tried to write to plugin that doesn\'t exist.');
+        return;
+    }
+    if (!pluginManager.runningPlugins.map(p => p.plugin.info.name).includes(pluginName)) {
+        logger.warn(['PluginManager','Settings'],'Wrote to plugin that isn\'t loaded. Creating temporary configHelper.') ;
+        cm = new PluginConfigHelper(pluginName);
+    } else {
+        cm = pluginManager.runningPlugins.find(p => p.plugin.info.name == pluginName).configManager;
+    }
+    logger.info(['PluginManager','Settings','IPC'],`Set Option "${key}" to "${value}"`);
+    cm.set(key,value);
 });
+
+ipcMain.handle('getPluginKey',(_event,pluginName,key,) => {
+    let cm: PluginConfigHelper;
+    if (!pluginManager.plugins.map(p => p.info.name).includes(pluginName) ) {
+        logger.error(['PluginManager','Settings'],'Tried to read from a plugin that doesn\'t exist.');
+        return;
+    }
+    if (!pluginManager.runningPlugins.map(p => p.plugin.info.name).includes(pluginName)) {
+        logger.warn(['PluginManager','Settings'],'Reading from a plugin that isn\'t loaded. Creating temporary configHelper.') ;
+        cm = new PluginConfigHelper(pluginName);
+    } else {
+        cm = pluginManager.runningPlugins.find(p => p.plugin.info.name == pluginName).configManager;
+    }
+    cm.get(key);
+});
+
+
 
 app.whenReady().then(() => {
     createWindow();

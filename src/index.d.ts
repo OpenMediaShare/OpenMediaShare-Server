@@ -6,14 +6,18 @@ declare global {
             forceRefresh: () => void,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             get: (key) => Promise<any>,
-            set: (key,value) => void
+            set: (key,value) => void,
             getBuilder: () => Promise<PluginInfo['configBuilder']>
         }
         plugins: {
             getPluginList: () => Promise<{all: PluginInfo[], loaded: PluginInfo[]}>,
-            getPluginConfig: (index) => Promise<PluginInfo['configBuilder']>
-            enable: (pluginName: string) => void
-            disable: (pluginName: string) => void
+            getPluginConfig: (index) => Promise<PluginInfo['configBuilder']>,
+            enable: (pluginName: string) => void,
+            disable: (pluginName: string) => void,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            get: (pluginName: string, key: string) => Promise<any>
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            set: (pluginName: string, key: string, value) => Promise<any>
         }
         callbacks: {
             clientUpdate: (callback: (clients: Client[]) => void) => void
@@ -26,7 +30,7 @@ declare global {
         close,
     }
 
-    interface configBuilder {
+    interface ConfigBuilder {
         pages: Record<string, {
             id: string,
             displayName: string,
@@ -49,7 +53,7 @@ declare global {
     interface PluginInfo {
         name: string,
         author: string,
-        configBuilder: configBuilder,
+        configBuilder: ConfigBuilder,
         version?: string,
         description?: string
         isRunning: boolean

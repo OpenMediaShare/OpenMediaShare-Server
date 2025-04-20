@@ -36,8 +36,46 @@ export class PluginManager {
         this.pluginFileMappings = {};
     }
 
+    async loadPlugins(){
+        const files = readdirSync(this.pluginDir,{ withFileTypes: true });
+        for(const file of files) {
+            if (!file.isFile() || !file.name.endsWith('js') && !file.name.endsWith('js.d')) continue;
+            logger.info(['Plugin Manager'],`Importing Plugin: ${file.name}`);
+            const plugin: FSPlugin = await import(path.join(this.pluginDir,file.name)); 
+
+            if (!plugin.info || !plugin.info.name) {
+                logger.warn(['Plugin Manager'],`File ${file.name} isn't a vaild plugin, Skipping. `);
+                return;
+            }
+            // Fix for my bad spelling, I'm sorry :(
+            // @ts-expect-error This is a missing type because it doesn't exist in any new projects, and is from my miss spelling.
+            if (plugin.info.auther) {
+                // @ts-expect-error This is a missing type because it doesn't exist in any new projects, and is from my miss spelling.
+                plugin.info.author = plugin.info.auther;
+            }
+
+
+
+            if (this.plugins.map(p => p.info.name).includes(plugin.info.name)){
+                logger.error(['Plugin Manager'],`Duplicate plugin "${plugin.info.name}" detected! Can\`t load plugin with duplicate name.`);
+                continue;
+            }
+            this.pluginFileMappings[plugin.info.name] = file.name;
+            this.plugins.push(plugin);
+            if (file.name.endsWith('js.d')){
+                logger.info(['Plugin Manager'],`Plugin "${file.name}" is disabled`);
+                continue;
+            }
+            await this.startPlugin(plugin.info.name);
+
+        }
+        if (Mainwindow) Mainwindow.webContents.send('allPluginsLoaded',this.runningPlugins.map(p => p.plugin.info));
+    }
+
+
     private async startPlugin(pluginName: string){
         const electronImport = await import('electron');
+        // [WaterWolf5918] Recreating this between plugins should help prevent plugins being able to modify builtin functions.
         const modules = {
             electron: electronImport,
             express: webServer,
@@ -90,41 +128,7 @@ export class PluginManager {
 
 
 
-    async loadPlugins(){
-        const files = readdirSync(this.pluginDir,{ withFileTypes: true });
-        for(const file of files) {
-            if (!file.isFile() || !file.name.endsWith('js') && !file.name.endsWith('js.d')) continue;
-            logger.info(['Plugin Manager'],`Importing Plugin: ${file.name}`);
-            const plugin: FSPlugin = await import(path.join(this.pluginDir,file.name)); 
 
-            if (!plugin.info || !plugin.info.name) {
-                logger.warn(['Plugin Manager'],`File ${file.name} isn't a vaild plugin, Skipping. `);
-                return;
-            }
-            // Fix for my bad spelling, I'm sorry :(
-            // @ts-expect-error This is a missing type because it doesn't exist in any new projects, and is from my miss spelling.
-            if (plugin.info.auther) {
-                // @ts-expect-error This is a missing type because it doesn't exist in any new projects, and is from my miss spelling.
-                plugin.info.author = plugin.info.auther;
-            }
-
-
-
-            if (this.plugins.map(p => p.info.name).includes(plugin.info.name)){
-                logger.error(['Plugin Manager'],`Duplicate plugin "${plugin.info.name}" detected! Can\`t load plugin with duplicate name.`);
-                continue;
-            }
-            this.pluginFileMappings[plugin.info.name] = file.name;
-            this.plugins.push(plugin);
-            if (file.name.endsWith('js.d')){
-                logger.info(['Plugin Manager'],`Plugin "${file.name}" is disabled`);
-                continue;
-            }
-            await this.startPlugin(plugin.info.name);
-
-        }
-        if (Mainwindow) Mainwindow.webContents.send('allPluginsLoaded',this.runningPlugins.map(p => p.plugin.info));
-    }
 
 
 
@@ -145,7 +149,6 @@ export class PluginManager {
     }
 
     async enablePlugin(pluginName: string){
-        console.log(pluginName);
         const legacy = this.plugins.find(p => p.info.name == pluginName).info.legacy;
         if (!this.plugins.map(p => p.info.name).includes(pluginName) ) {
             logger.error(['PluginManager'],'Tried to start a plugin that isn\'t loaded.');
@@ -162,7 +165,7 @@ export class PluginManager {
         this.startPlugin(pluginName);
     }
 
-    disablePlugin(pluginName: string){
+    async disablePlugin(pluginName: string){
         if (!this.plugins.map(p => p.info.name).includes(pluginName)) {
             logger.error(['PluginManager'],'Tried to stop a plugin that isn\'t loaded. How did the plugin start?');
             return;
@@ -187,7 +190,7 @@ export class PluginManager {
             return;
         }
 
-        this.stopPlugin(pluginName);
+        await this.stopPlugin(pluginName);
     }
 
 }
@@ -198,7 +201,7 @@ export class PluginConfigHelper {
     vaild: boolean;
     configPath: string;
     config: object;
-    constructor(plugin: {info: {name: string, configBuilder: configBuilder}},filePath=path.join(homedir(),'.openMediaShare','configs')){
+    constructor(plugin: {info: {name: string, configBuilder: ConfigBuilder}},filePath=path.join(homedir(),'.openMediaShare','configs')){
         this.vaild = false;
         this.name = plugin.info.name;
         this.filePath = filePath;
@@ -212,7 +215,7 @@ export class PluginConfigHelper {
         
     }
 
-    private buildPluginConfig(plugin: {info: {name: string, configBuilder: configBuilder}}) {
+    private buildPluginConfig(plugin: {info: {name: string, configBuilder: ConfigBuilder}}) {
         
         if(!existsSync(this.configPath)){
             const json = {};
