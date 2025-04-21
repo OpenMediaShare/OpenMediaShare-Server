@@ -6,12 +6,14 @@ declare global {
             forceRefresh: () => void,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             get: (key) => Promise<any>,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            getConfig: () => Promise<any>,
             set: (key,value) => void,
             getBuilder: () => Promise<PluginInfo['configBuilder']>
         }
         plugins: {
             getPluginList: () => Promise<{all: PluginInfo[], loaded: PluginInfo[]}>,
-            getPluginConfig: (index) => Promise<PluginInfo['configBuilder']>,
+            getConfig: (pluginName: string) => Promise<PluginInfo['configBuilder']>,
             enable: (pluginName: string) => void,
             disable: (pluginName: string) => void,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,9 +36,18 @@ declare global {
         pages: Record<string, {
             id: string,
             displayName: string,
-            type: 'checkbox' | 'text' | 'number', //add options here
+            type: 'checkbox' | 'text' | 'number' | 'range' | 'dropdown' | 'color', //add options here
             required: boolean,
             default?: string | boolean | number,
+            // This is REQUIRED if your using range
+            min?: number,
+            // This is REQUIRED if your using range
+            max?: number,
+            // This is REQUIRED if your using range
+            step?: number
+            dropdownEntries?: string[],
+            // Only works for text inputs
+            sensitive?: boolean
         }[]>
     }
 

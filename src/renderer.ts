@@ -1,14 +1,19 @@
 const settingsToggleTenplate = document.getElementById('settings-toggle-tenplate');
-const providerTenplate = document.getElementById('provider-tenplate');
-const pluginTenplate = document.getElementById('plugin-tenplate');
+const settingsTextTenplate   = document.getElementById('settings-text-tenplate');
+const settingsNumberTenplate = document.getElementById('settings-number-tenplate');
+const settingsRangeTenplate  = document.getElementById('settings-range-tenplate');
+const settingsColorTenplate  = document.getElementById('settings-color-tenplate');
 
-const pluginsListEl = document.getElementById('plugins-list');
-const pluginsSettingsEl = document.getElementById('plugin-settings');
+const providerTenplate       = document.getElementById('provider-tenplate');
+const pluginTenplate         = document.getElementById('plugin-tenplate');
 
-const providerTable = document.getElementById('provider-table');
-const settingsPage = document.getElementById('settings-content');
+const pluginsListEl          = document.getElementById('plugins-list');
+const pluginsSettingsEl      = document.getElementById('plugin-settings');
 
-const backBtn = document.getElementById('back');
+const providerTable          = document.getElementById('provider-table');
+const settingsPage           = document.getElementById('settings-content');
+
+const backBtn                = document.getElementById('back');
 
 const config = {
     showIPS: false,
@@ -226,7 +231,7 @@ async function renderPluginSettings(plugin: PluginInfo) {
 }
 
 
-async function renderSettingsPage(pageEl: HTMLElement, config: ConfigBuilder, pluginName: string = 'global'){
+async function renderSettingsPage(pageEl: HTMLElement, configBuilder: ConfigBuilder, pluginName: string = 'global'){
     pageEl.innerHTML = '';
     if (pluginName !== 'global'){
         const el = document.createElement('p');
@@ -234,25 +239,26 @@ async function renderSettingsPage(pageEl: HTMLElement, config: ConfigBuilder, pl
         el.innerText = pluginName;
         pageEl.appendChild(el);
     }
-    for (const page in config.pages) { 
+    for (const page in configBuilder.pages) { 
         const el = document.createElement('p');
         el.classList.add('settings-category');
         el.innerText = page;
         pageEl.appendChild(el);
-        for (const setting of config.pages[page]){
-            let value;
-            if (pluginName == 'global'){
-                value = await window.settings.get(setting.id);
-            } else {
-                value = await window.plugins.get(pluginName,setting.id);
-            }
+        let config;
+        if (pluginName == 'global'){
+            config = await window.settings.getConfig();
+        } else {
+            config = await window.plugins.getConfig(pluginName);
+        }
+        for (const setting of configBuilder.pages[page]){
+
 
             switch(setting.type) {
                 case 'checkbox': {
                     const settingsEl = ((settingsToggleTenplate as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment);
                     const toggle = settingsEl.querySelector('.toggle-swtich input[type="checkbox"]') as HTMLInputElement;
                     (settingsEl.querySelector('.settings-label') as HTMLParagraphElement).innerText = setting.displayName;
-                    toggle.checked = (typeof value == 'boolean') ? value : false;
+                    toggle.checked = (typeof config[setting.id] == 'boolean') ? config[setting.id] : false;
                     toggle.addEventListener('change',() => {
                         if (pluginName == 'global'){
                             window.settings.set(setting.id,toggle.checked);
@@ -261,6 +267,101 @@ async function renderSettingsPage(pageEl: HTMLElement, config: ConfigBuilder, pl
                             window.plugins.set(pluginName,setting.id,toggle.checked);
                         }
 
+                    });
+                    pageEl.appendChild(settingsEl);
+                    break;
+                }
+                case 'text': {
+                    const settingsEl = ((settingsTextTenplate as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment);
+                    const textInput = settingsEl.querySelector('input[type="text"]') as HTMLInputElement;
+                    (settingsEl.querySelector('.settings-label') as HTMLParagraphElement).innerText = setting.displayName;
+                    textInput.value = config[setting.id];
+                    textInput.addEventListener('focusout',() => {
+                        if (pluginName == 'global'){
+                            window.settings.set(setting.id,textInput.value);
+                            loadWebSettings();
+                        } else {
+                            window.plugins.set(pluginName,setting.id,textInput.value);
+                        }
+                    });
+                    pageEl.appendChild(settingsEl);
+                    break;
+                }
+                case 'number': {
+                    const settingsEl = ((settingsNumberTenplate as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment);
+                    const numInput = settingsEl.querySelector('input[type="number"]') as HTMLInputElement;
+                    (settingsEl.querySelector('.settings-label') as HTMLParagraphElement).innerText = setting.displayName;
+                    numInput.value = config[setting.id] ?? 0;
+                    numInput.min = (setting.min ?? Number.MIN_VALUE).toPrecision();
+                    numInput.max = (setting.max ?? Number.MAX_VALUE).toPrecision();
+                    numInput.addEventListener('focusout',() => {
+                        if (pluginName == 'global'){
+                            window.settings.set(setting.id,numInput.value);
+                            loadWebSettings();
+                        } else {
+                            window.plugins.set(pluginName,setting.id,numInput.value);
+                        }
+                    });
+                    pageEl.appendChild(settingsEl);
+                    break;
+                }
+                case 'range': {
+                    const settingsEl = ((settingsRangeTenplate as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment);
+                    const rangeInput = settingsEl.querySelector('input[type="range"]') as HTMLInputElement;
+                    const numInput = settingsEl.querySelector('input[type="number"]') as HTMLInputElement;
+                    
+                    (settingsEl.querySelector('.settings-label') as HTMLParagraphElement).innerText = setting.displayName;
+                    
+                    numInput.value = config[setting.id];
+                    numInput.min = (setting.min ?? Number.MIN_VALUE).toPrecision();
+                    numInput.max = (setting.max ?? Number.MAX_VALUE).toPrecision();
+                    rangeInput.step = (setting.step ?? 0.1).toPrecision();
+                    rangeInput.value = config[setting.id];
+                    rangeInput.min = (setting.min ?? Number.MIN_VALUE).toPrecision();
+                    rangeInput.max = (setting.max ?? Number.MAX_VALUE).toPrecision();
+                    
+                    numInput.addEventListener('focusout',() => {
+                        if (pluginName == 'global'){
+                            window.settings.set(setting.id,numInput.value);
+                            loadWebSettings();
+                        } else {
+                            window.plugins.set(pluginName,setting.id,rangeInput.value);
+                        }
+                    });
+                    
+                    rangeInput.addEventListener('change',() => {
+                        if (pluginName == 'global'){
+                            window.settings.set(setting.id,rangeInput.value);
+                            loadWebSettings();
+                        } else {
+                            window.plugins.set(pluginName,setting.id,rangeInput.value);
+                        }
+                    });
+
+                    rangeInput.addEventListener('input',() => {
+                        numInput.value = rangeInput.value;
+                    });
+
+                    numInput.addEventListener('input',() => {
+                        rangeInput.value = numInput.value;
+                    });
+
+                    pageEl.appendChild(settingsEl);
+                    break;
+                }
+                case 'color': {
+                    const settingsEl = ((settingsColorTenplate as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment);
+                    const colorInput = settingsEl.querySelector('input[type="color"]') as HTMLInputElement;
+                    (settingsEl.querySelector('.settings-label') as HTMLParagraphElement).innerText = setting.displayName;
+                    colorInput.value = config[setting.id];
+
+                    colorInput.addEventListener('focusout',() => {
+                        if (pluginName == 'global'){
+                            window.settings.set(setting.id,colorInput.value);
+                            loadWebSettings();
+                        } else {
+                            window.plugins.set(pluginName,setting.id,colorInput.value);
+                        }
                     });
                     pageEl.appendChild(settingsEl);
                     break;

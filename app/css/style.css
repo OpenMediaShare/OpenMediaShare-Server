@@ -227,6 +227,50 @@ border-radius: 8px;
     margin: 0px;
 }
 
+.settings-input {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 4px 10px;
+    margin-left: 20px;
+    outline: 2px solid var(--bg);
+    background: var(--bg2);
+    border: none;
+    font-size: 18px;
+    border-radius: 8px;
+}
+
+.settings-text-input {
+    width: 400px;
+}
+
+.settings-number-input {
+    width: 80px;
+}
+
+.settings-color-input {
+    height: 32px;
+    width: auto;
+    aspect-ratio: 1/1;
+}
+
+.settings-color-input::-webkit-color-swatch {
+    /* height: 30px;
+    width: auto;
+    aspect-ratio: 1/1;
+    border-radius: 8px;
+    padding: 0px; */
+    border-color: transparent;
+    border-radius: 50%;
+}
+
+.settings-color-input::-webkit-color-swatch-wrapper {
+    height: 24px;
+    width: auto;
+    aspect-ratio: 1/1;
+    padding: 0px;
+}
 
 
 /* 
