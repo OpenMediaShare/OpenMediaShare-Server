@@ -5,7 +5,20 @@ const path = require('path');
 module.exports = {
     packagerConfig: {
         'icon': './build/YTlogo4.ico',
-        'name': 'OpenMediaShare'
+        'name': 'OpenMediaShare',
+        'ignore': [
+            'src',
+            'docs',
+            'out',
+            '.vscode',
+            '.github',
+            '.gitignore',
+            'eslintrc.json',
+            'build',
+            'TODO',
+            'tsconfig.json',
+            'forge.config.js'
+        ]
     },
     rebuildConfig: {},
     makers: [

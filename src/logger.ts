@@ -1,7 +1,6 @@
 import { configStore } from './main';
 
-const colors = {
-    clear: '\x1b[0m',
+export const colors = {
     cyan: '\x1b[36m', //43
     yellow: '\x1b[33m',
     green: '\x1b[32m',
@@ -12,7 +11,10 @@ const colors = {
 
     warning: '\x1b[93;1;4m',
     warning2: '\x1b[96;1;4m',
-    red: '\x1b[91;1m'
+    red: '\x1b[91;1m',
+
+    bold: '\x1b[1m',
+    clear: '\x1b[0m',
 };
 
 
