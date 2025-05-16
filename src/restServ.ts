@@ -30,7 +30,7 @@ webServer.use((req, res, next) => {
     }
     
     if (req.method !== 'POST') {next(); return;}
-    if (req.body.auth !== undefined && req.body.auth.uuid !== undefined) {next(); return;}
+    if (req.body !== undefined && req.body.auth !== undefined && req.body.auth.uuid !== undefined) {next(); return;}
     res.sendStatus(400);
     logger.dwarn(['WebServ','Middleware'],'Caught packet without UUID, ignoring.');
 
@@ -60,7 +60,7 @@ webServer.use((req, res, next) => {
 
 webServer.use((req, res, next) => {
     if (req.method !== 'POST') {next(); return;}
-    if (req.url == '/api/auth/openSession') {next(); return;}
+    if (req.url.toLowerCase() == '/api/auth/opensession') {next(); return;}
 
     //don't run rest of middleware if incoming uuid has a existing client.
     if (authManager.clientExistByUUID(req.body.auth.uuid)) {
