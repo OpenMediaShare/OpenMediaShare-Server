@@ -1,5 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenMediaShare</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <template id="provider-tenplate">
+        <div class="provider">
+            <div class="provider-image"><img></div>
+            <div class="provider-state"><span class="material-symbols-rounded">play_arrow</span></div>
+            <div class="provider-name"><p>Spicetify Client</p></div>
+            <div class="provider-current-title"><p>KAMELEON<br>Kami Kehoe</p></div>
+            <div class="provider-service"><p>spicetify</p></div>
+            <div class="provider-ip"><p>::1</p></div>
+            <div class="provider-uuid"><p>b171afd2-5741-462f-87d2-53a928de8676</p></div>
+        </div>
+    </template>
+
+    <template id="settings-toggle-tenplate">
+        <div class="settings-option">
+            <p class="settings-label">label</p>
+            <label class="toggle-swtich">
+                <input type="checkbox">
+                <span class="toggle-switch-slider"></span>
+            </label>
+        </div>
+    </template>
+
+    <template id="settings-text-tenplate">
+        <div class="settings-option settings-text">
+            <p class="settings-label">label</p>
+            <input type="text" placeholder="text" class="settings-input settings-text-input">
+        </div>
+    </template>
+
+    
+    <template id="settings-number-tenplate">
+        <div class="settings-option settings-text">
+            <p class="settings-label">label</p>
+            <input type="number" placeholder="0000" class="settings-input settings-number-input">
+        </div>
+    </template>
+
+    <template id="settings-range-tenplate">
+        <div class="settings-option settings-text">
+            <p class="settings-label">label</p>
+            <input type="range" class="settings-input">
+            <input type="number" placeholder="0000" class="settings-input settings-number-input">
+        </div>
+    </template>
+
+    <template id="settings-color-tenplate">
+        <div class="settings-option settings-text">
+            <p class="settings-label">label</p>
+            <input type="color" class="settings-input settings-color-input">
+        </div>
+    </template>
+
+
+    <template id="plugin-tenplate">
+        <div class="plugin">
+            <div class="plugin-topbar">
+                <span class="plugin-name">Very advanced plugin</span>
+                <div class="plugin-topbar-right">
+                    <span class="material-symbols-rounded plugin-settings-btn">settings</span>
+                    <label class="toggle-swtich">
+                        <input type="checkbox">
+                        <span class="toggle-switch-slider"></span>
+                    </label>
+                </div>
+
+            </div>
+            <div class="plugin-desc">
+                <p class="plugin-desc">A helpful description of your plugin.</p>
+            </div>
+        </div>
+    </template>
+
+
+    <div class="content">
+        <div class="sidebar">
+            <div class="sidebar-button hidden" id="back">
+                <span class="material-symbols-rounded">undo</span>
+                <p>Back</p>
+            </div>
+
+            <div class="sidebar-button active-sidebar-button" id="home">
+                <span class="material-symbols-rounded">home</span>
+                <p>Home</p>
+            </div>
+
+            <div class="sidebar-button" id="plugins">
+                <span class="material-symbols-rounded">extension</span>
+                <p>Plugins</p>
+            </div>
+
+            <div class="sidebar-button" id="settings">
+                <span class="material-symbols-rounded">settings</span>
+                <p>Settings</p>
+            </div>
+        </div>
+
+        <div class="page home-content active-page" id="home-content">
+            <div class="provider provider-header">
+                <div class="provider-image"><p>Image</p></div>
+                <div class="provider-state"><p>State</p></div>
+                <div class="provider-name"><p>Name</p></div>
+                <div class="provider-current-title"><p>Current Title</p></div>
+                <div class="provider-service"><p>Service</p></div>
+                <div class="provider-ip"><p>IP</p></div>
+                <div class="provider-uuid"><p>UUID</p></div>
+            </div>
+            <div id="provider-table" class="provider-table">
+
+            </div>
+
+        </div>
+
+        <div class="page plugins-content" id="plugins-content">
+            <div id="plugins-list" class="plugins-list">
+
+            </div>
+            <div id="plugin-settings" class="settings-content">
+
+            </div>
+        </div>
+
+        <div class="page settings-content" id="settings-content">
+
+        </div>
+    </div>
+
+    <script src="../dist/renderer.js"></script>
+</body>
+</html>
+
+<!-- <!DOCTYPE html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8" />
@@ -16,28 +156,27 @@
 </head>
 
 <body>
-
-    <div id="sidebyside">
-        <div id="sidebar">
-            <div id="home-item" class="sidebar-item sidebar-item-active">
+    <div id="" class="sidebyside">
+        <div class="sidebar">
+            <div id="home-item" class="sidebar-item side-tab sidebar-item-active">
                 <span class="material-symbols-outlined sidebar-item-icon">
                     home
                 </span>
                 Home
             </div>
-            <div id="plugins-item" class="sidebar-item">
+            <div id="plugins-item" class="sidebar-item side-tab">
                 <span class="material-symbols-outlined sidebar-item-icon">
                     extension
                 </span>
                 Plugins
             </div>
-            <div id="settings-item" class="sidebar-item">
+            <div id="settings-item" class="sidebar-item side-tab">
                 <span class="material-symbols-outlined sidebar-item-icon">
                     settings
                 </span>
                 Settings
             </div>
-            <div id="debug-item" class="sidebar-item hidden">
+            <div id="debug-item" class="sidebar-item side-tab hidden">
                 <span class="material-symbols-outlined sidebar-item-icon">
                     bug_report
                 </span>
@@ -72,63 +211,28 @@
             </div>
 
             <div id="plugins-page" class="master-page plugins-page">
-                <h1>Work In Progress</h1>
-                <div class="grid-container hidden">
-                    <div class="plugin">
-                        <div class="plugin-details">
-                            <div class="plugin-topbar">
-                                <span class="plugin-title">
-                                    WatchRPC
-                                </span>
-                                <span class="material-symbols-outlined">
-                                    settings
-                                </span>
-                                <label class="switch">
-                                    <input type="checkbox">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <span>By WaterWolf5918</span><br />
-                            <span>A plugin that displays currently playing media on your discord profile</span>
-                        </div>
-                    </div>  
-                    <div class="plugin">
-                        <div class="plugin-details">
-                            <div class="plugin-topbar">
-                                <span class="plugin-title">
-                                    WatchRPC
-                                </span>
-                                <span class="material-symbols-outlined">
-                                    settings
-                                </span>
-                                <label class="switch">
-                                    <input type="checkbox">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <span>By WaterWolf5918</span><br />
-                            <span>A plugin that displays currently playing media on your discord profile</span>
-                        </div>
-                    </div>  
-                    <div class="plugin">
-                        <div class="plugin-details">
-                            <div class="plugin-topbar">
-                                <span class="plugin-title">
-                                    WatchRPC
-                                </span>
-                                <span class="material-symbols-outlined">
-                                    settings
-                                </span>
-                                <label class="switch">
-                                    <input type="checkbox">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <span>By WaterWolf5918</span><br />
-                            <span>A plugin that displays currently playing media on your discord profile</span>
-                        </div>
-                    </div>  
+                <div id="plugin-settings-grid" class="grid-container ">
+
                 </div>
+
+                <div id="plugin-settings-panel" class="sidebyside hidden">
+                    <div id="plugin-settings-sidebar" class="sidebar">
+
+                    </div>
+                    <div id="plugin-settings-page">
+
+                        <div class="plugin-input-gen plugin-input-text">
+                            <span>Text</span>
+                            <input type="text">
+                        </div>
+
+                        <div class="plugin-input-gen plugin-input-checkbox">
+                            <span>Checkbox</span>
+                            <input type="checkbox">
+                        </div>
+                    </div>
+                </div>
+
             </div>
             <div id="settings-page" class="master-page plugins-page">
                 <div class="grid-container">
@@ -148,6 +252,4 @@
 
 </body>
 <script src="../dist/renderer.js"></script>
-
-
-</html>
+</html> -->

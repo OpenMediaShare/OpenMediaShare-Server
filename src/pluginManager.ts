@@ -1,99 +1,212 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from 'fs';
 import { homedir } from 'os';
 import path from 'path';
-
-import { store } from './main';
+import { Notification } from 'electron';
+import { Mainwindow, store } from './main';
 import { webServer } from './restServ';
 import { Logger } from './logger';
+import { TypedEventEmitterClass } from './utils';
+
+type PluginEvents = {
+    playbackChange: [PlayerState],
+    mediaChange: [VideoMetadata],
+    rawInfoUpdate: [VideoMetadata],
+    rawPlayerStateChange: [PlayerState]
+}
+
+type RunningPlugin = {
+    plugin: FSPlugin,
+    configManager: PluginConfigHelper,
+    eventDispatcher: TypedEventEmitterClass<PluginEvents>
+}
 
 const logger = new Logger();
 export class PluginManager {
+    lastSong: string;
     pluginDir: any;
+    pluginFileMappings: object;
     plugins: FSPlugin[];
+    runningPlugins: RunningPlugin[];
     constructor(){
         this.pluginDir = path.join(homedir(),'.openMediaShare','plugins');
         if(!existsSync(this.pluginDir)) { mkdirSync(this.pluginDir,{ recursive: true }); }
         this.plugins = [];
+        this.runningPlugins = [];
+        this.pluginFileMappings = {};
     }
 
-    async startPlugins(){
-        let consoleLogDetect = true;
+    async loadPlugins(){
         const files = readdirSync(this.pluginDir,{ withFileTypes: true });
-        const electronImport = await import('electron');
-        const modules = {
-            electron: electronImport,
-            infoStore: store,
-            express: webServer
-        };
         for(const file of files) {
-            if (!file.isFile() || !file.name.endsWith('js')) continue;
+            if (!file.isFile() || !file.name.endsWith('js') && !file.name.endsWith('js.d')) continue;
             logger.info(['Plugin Manager'],`Importing Plugin: ${file.name}`);
             const plugin: FSPlugin = await import(path.join(this.pluginDir,file.name)); 
-            logger.info(['Plugin Manager'],`Starting Plugin: ${plugin.info.name}`);
-            const oldLog = console.log;
-            console.log = (e) => {
-                if (consoleLogDetect) {
-                    oldLog(`This plugin is using console.log, Please ask ${plugin.info.auther} to consider switching to the plugin logger instead.`);
-                }
-                consoleLogDetect = false;
-                console.log = oldLog;
-                logger.info(['Legacy Plugin',plugin.info.name],e);
-                // oldLog(e);
-            };
-            const pluginConfigHelper = new PluginConfigHelper(plugin);
-            plugin.start(modules,pluginConfigHelper);
+
+            if (!plugin.info || !plugin.info.name) {
+                logger.warn(['Plugin Manager'],`File ${file.name} isn't a vaild plugin, Skipping. `);
+                return;
+            }
+            // Fix for my bad spelling, I'm sorry :(
+            // @ts-expect-error This is a missing type because it doesn't exist in any new projects, and is from my miss spelling.
+            if (plugin.info.auther) {
+                // @ts-expect-error This is a missing type because it doesn't exist in any new projects, and is from my miss spelling.
+                plugin.info.author = plugin.info.auther;
+            }
+
+
+
+            if (this.plugins.map(p => p.info.name).includes(plugin.info.name)){
+                logger.error(['Plugin Manager'],`Duplicate plugin "${plugin.info.name}" detected! Can\`t load plugin with duplicate name.`);
+                continue;
+            }
+            this.pluginFileMappings[plugin.info.name] = file.name;
             this.plugins.push(plugin);
-            //check to see if infoupdate exists before calling it
-            if (plugin.infoUpdate instanceof Function){
-                store.on('infoUpdated',(metadata) => {
-                    plugin.infoUpdate(modules,metadata,pluginConfigHelper);
-                });
+            if (file.name.endsWith('js.d')){
+                logger.info(['Plugin Manager'],`Plugin "${file.name}" is disabled`);
+                continue;
             }
-            if (plugin.stateUpdate instanceof Function){
-                store.on('playerStateChange',(playerState) => {
-                    plugin.stateUpdate(modules,playerState,pluginConfigHelper);
-                });
-            }
-            logger.info(['Plugin Manager'],`Started Plugin: ${plugin.info.name}`);
+            await this.startPlugin(plugin.info.name);
+
         }
+        if (Mainwindow) Mainwindow.webContents.send('allPluginsLoaded',this.runningPlugins.map(p => p.plugin.info));
+    }
+
+
+    private async startPlugin(pluginName: string){
+        const electronImport = await import('electron');
+        // [WaterWolf5918] Recreating this between plugins should help prevent plugins being able to modify builtin functions.
+        const modules = {
+            electron: electronImport,
+            express: webServer,
+            Logger: Logger
+        };
+
+        const plugin = this.plugins.find(p => p.info.name == pluginName);
+        const runningPlugin:RunningPlugin = {plugin: plugin,configManager: new PluginConfigHelper(plugin),eventDispatcher: new TypedEventEmitterClass()};
+
+        plugin.info.legacy = false;
+
+        logger.info(['Plugin Manager'],`Starting Plugin: ${plugin.info.name}`); 
+        store.on('infoUpdated',(e) => {
+            runningPlugin.eventDispatcher.emit('rawInfoUpdate',e);
+            if (this.lastSong == e.data.title) return;
+            runningPlugin.eventDispatcher.emit('mediaChange',e);
+            this.lastSong = e.data.title;
+        });
+
+        store.on('playerStateChange',(e) => {
+            runningPlugin.eventDispatcher.emit('rawPlayerStateChange',e);
+            if (e == undefined) return;
+            runningPlugin.eventDispatcher.emit('playbackChange',e);
+        });
+
+
+
+        plugin.start(modules,runningPlugin.configManager,runningPlugin.eventDispatcher);
+        // check to see if infoupdate exists before calling it
+        if (plugin.infoUpdate instanceof Function){
+            if (!plugin.info.legacy) {logger.warn(['Plugin Manager'],`Plugin ${plugin.info.name} looks to be using the v0 plugin API. Please ask ${plugin.info.author} to consider switching to the new v1 API.`);}
+
+            plugin.info.legacy = true;
+            store.on('infoUpdated',(metadata) => {
+                plugin.infoUpdate(modules,metadata,runningPlugin.configManager);
+            });
+        }
+        if (plugin.stateUpdate instanceof Function){
+            if (!plugin.info.legacy) {logger.warn(['Plugin Manager'],`Plugin ${plugin.info.name} looks to be using the v0 plugin API. Please ask ${plugin.info.author} to consider switching to the new v1 API.`);}
+
+            plugin.info.legacy = true;
+            store.on('playerStateChange',(playerState) => {
+                plugin.stateUpdate(modules,playerState,runningPlugin.configManager);
+            });
+        }
+        logger.info(['Plugin Manager'],`Started Plugin: ${plugin.info.name}`);
+
+        this.runningPlugins.push(runningPlugin);
     }
 
 
 
 
+
+
+
+
+    private async stopPlugin(pluginName){
+        const runningPlugin = this.runningPlugins.find(rp => rp.plugin.info.name == pluginName);
+        logger.info(['Plugin Manager'],`Stopping Plugin: ${runningPlugin.plugin.info.name}`);
+        runningPlugin.eventDispatcher.emitter.removeAllListeners();
+        runningPlugin.plugin.stop();
+        logger.info(['Plugin Manager'],`Stopped Plugin: ${runningPlugin.plugin.info.name}`);
+        this.runningPlugins = this.runningPlugins.filter(_rp => _rp.plugin.info.name !== runningPlugin.plugin.info.name);
+    }
+
     async stopPlugins(){
-        // const files = readdirSync(this.pluginDir,{ withFileTypes: true });
-        // for(const file of files) {
-        //     if (!file.isFile() || !file.name.endsWith('js')) return;
-        //     console.log(`Starting Plugin: ${file.name}`);
-        //     const plugin = await import(path.join(this.pluginDir,file.name));
-        //     plugin.stop();
-        //     console.log(`Started Plugin: ${plugin.info.name}`);
-        // }
-
-        // why were we creating a new plugin before calling stop, this wasn't doing anything for the running plugin wtf
-        this.plugins.forEach(plugin => {
-            logger.info(['Plugin Manager'],`Stopping Plugin: ${plugin.info.name}`);
-            plugin.stop();
-            logger.info(['Plugin Manager'],`Stopped Plugin: ${plugin.info.name}`);
-
+        this.runningPlugins.forEach(lp => {
+            this.stopPlugin(lp);
         });
+    }
+
+    async enablePlugin(pluginName: string){
+        const legacy = this.plugins.find(p => p.info.name == pluginName).info.legacy;
+        if (!this.plugins.map(p => p.info.name).includes(pluginName) ) {
+            logger.error(['PluginManager'],'Tried to start a plugin that isn\'t loaded.');
+            return;
+        }
+        if (this.runningPlugins.map(p => p.plugin.info.name).includes(pluginName) && !legacy) {
+            logger.warn(['PluginManager'],'Tried to enable plugin that is already running') ;
+            return;
+        }
+
+        renameSync(path.join(this.pluginDir,this.pluginFileMappings[pluginName]),path.join(this.pluginDir,this.pluginFileMappings[pluginName].replace('.d','')));
+        this.pluginFileMappings[pluginName] = this.pluginFileMappings[pluginName].replace('.d','');
+        if (legacy) return;
+        this.startPlugin(pluginName);
+    }
+
+    async disablePlugin(pluginName: string){
+        if (!this.plugins.map(p => p.info.name).includes(pluginName)) {
+            logger.error(['PluginManager'],'Tried to stop a plugin that isn\'t loaded. How did the plugin start?');
+            return;
+        }
+        if (!this.runningPlugins.map(p => p.plugin.info.name).includes(pluginName)) {
+            logger.warn(['PluginManager'],'Tried to disable plugin that isn\'t running.') ;
+            return;
+        }
+
+
+        renameSync(path.join(this.pluginDir,this.pluginFileMappings[pluginName]),path.join(this.pluginDir,`${this.pluginFileMappings[pluginName]}.d`));
+        this.pluginFileMappings[pluginName] = `${this.pluginFileMappings[pluginName]}.d`;
+        if(this.plugins.find(p => p.info.name == pluginName).info.legacy){
+            logger.error(['PluginManager'],'Legacy plugins do not support live starting or stopping.');
+            if (Mainwindow) {
+                new Notification({
+                    urgency: 'critical',
+                    title: '⚠️ Plugin Toggle Note',
+                    body: 'Legacy plugins do not support live stopping.\n\nThis plugin will be disabled next time you restart OpenMediaShare.'
+                }).show();
+            }
+            return;
+        }
+
+        await this.stopPlugin(pluginName);
     }
 
 }
 
-class PluginConfigHelper {
+export class PluginConfigHelper {
     name: string;
-    path: string;
+    filePath: string;
     vaild: boolean;
     configPath: string;
-    constructor(plugin: FSPlugin){
+    config: object;
+    constructor(plugin: {info: {name: string, configBuilder: ConfigBuilder}},filePath=path.join(homedir(),'.openMediaShare','configs')){
         this.vaild = false;
         this.name = plugin.info.name;
-        this.path = path.join(homedir(),'.openMediaShare','configs');
-        this.configPath = path.join(this.path,`${this.name}.config.json`);
-        if (!existsSync(this.path)) mkdirSync(this.path,{recursive: true});
+        this.filePath = filePath;
+        this.configPath = path.join(this.filePath,`${this.name}.config.json`);
+        if (!existsSync(this.filePath)) mkdirSync(this.filePath,{recursive: true});
 
         if(plugin.info.configBuilder){
             this.buildPluginConfig(plugin);
@@ -102,12 +215,11 @@ class PluginConfigHelper {
         
     }
 
-    private buildPluginConfig(plugin: FSPlugin) {
+    private buildPluginConfig(plugin: {info: {name: string, configBuilder: ConfigBuilder}}) {
         
         if(!existsSync(this.configPath)){
             const json = {};
             const pages = plugin.info.configBuilder.pages;
-
             // const testPages = testPlugin.info.configBuilder.pages;
             //# condense pages into one key:value pairs 
             //## loop over each page
@@ -117,19 +229,16 @@ class PluginConfigHelper {
             });
             writeFileSync(this.configPath,JSON.stringify(json,null,4),);
         }
+        this.config = JSON.parse(readFileSync(this.configPath,'utf-8'));
         //idk do ui stuff sometime
     }
 
     set(key,value) {
-        const json = JSON.parse(readFileSync(this.configPath,'utf-8'));
-        json[key] = value;
-        writeFileSync(this.configPath,JSON.stringify(json,null,4),);
+        this.config[key] = value;
+        writeFileSync(this.configPath,JSON.stringify(this.config,null,4),);
     }
 
     get(key) {
-        const json = JSON.parse(readFileSync(this.configPath,'utf-8'));
-        return json[key];
+        return this.config[key];
     }
 }
-
-
