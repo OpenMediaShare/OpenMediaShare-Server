@@ -3,6 +3,7 @@ import 'oms-sharedtypes';
 declare global {
     interface Window {
         settings: {
+            getAppVersion: () => Promise<string>
             forceRefresh: () => void,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             get: (key) => Promise<any>,

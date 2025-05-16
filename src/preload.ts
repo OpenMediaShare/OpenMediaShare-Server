@@ -1,7 +1,8 @@
 /* eslint-disable no-irregular-whitespace */
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, app} from 'electron';
+
 
 
 contextBridge.exposeInMainWorld('controls', {
@@ -12,6 +13,8 @@ contextBridge.exposeInMainWorld('controls', {
 });
 
 contextBridge.exposeInMainWorld('settings', {
+    
+    getAppVersion: () => ipcRenderer.invoke('getAppVersion'),
     forceRefresh: ()  => ipcRenderer.invoke('forceRefresh'),
 
     getBuilder: ()    => ipcRenderer.invoke('getConfigBuilder'),

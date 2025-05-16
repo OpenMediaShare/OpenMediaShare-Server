@@ -96,7 +96,7 @@ function createWindow() {
                 appShouldClose = true;
                 logger.info(['Main'],'Shutting Down...');
                 await pluginManager.stopPlugins();
-                BrowserWindow.getFocusedWindow().hide();
+                
                 app.quit();
             } else {
                 BrowserWindow.getFocusedWindow().hide();
@@ -107,6 +107,9 @@ function createWindow() {
 
 
 
+ipcMain.handle('getAppVersion', () => {
+    return app.getVersion();
+});
 
 ipcMain.handle('forceRefresh', () => {
     Mainwindow.reload();

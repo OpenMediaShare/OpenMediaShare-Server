@@ -1,3 +1,4 @@
+const settingUnknownTenplate = document.getElementById('settings-unknown-tenplate');
 const settingsToggleTenplate = document.getElementById('settings-toggle-tenplate');
 const settingsTextTenplate   = document.getElementById('settings-text-tenplate');
 const settingsNumberTenplate = document.getElementById('settings-number-tenplate');
@@ -366,6 +367,12 @@ async function renderSettingsPage(pageEl: HTMLElement, configBuilder: ConfigBuil
                     pageEl.appendChild(settingsEl);
                     break;
                 }
+                default: {
+                    const settingsEl = ((settingUnknownTenplate as HTMLTemplateElement).content.cloneNode(true) as DocumentFragment);
+                    (settingsEl.querySelector('.settings-label') as HTMLParagraphElement).innerText = `Error:Unknown input type, is your app up to date?\n** Debug Info **\nSetting Type: ${setting.type}\n App version: ${await window.settings.getAppVersion()}`;
+                    pageEl.appendChild(settingsEl);
+                }
+
             }
         }
     }
