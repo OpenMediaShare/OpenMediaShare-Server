@@ -18,7 +18,7 @@ const tray: Tray = null;
 const logger = new Logger();
 
 export let Mainwindow: BrowserWindow;
-let WindowCloseState = false;
+let appShouldQuit = false;
 
 
 
@@ -45,11 +45,10 @@ function createWindow() {
     if (!tray) { positron.createBasicTray(tray, Mainwindow); }
 
     Mainwindow.on('close', (e) => {
-        WindowCloseState ? console.log() : e.preventDefault();
+        if (!appShouldQuit) e.preventDefault();
         dialog.showMessageBox(positron.closedialogSettings).then(async (result) => {
-            // logger.derror([''],result.checkboxChecked.toString());
-            if (result.response) {
-                WindowCloseState = true;
+            if (result.response == 1) {
+                appShouldQuit = true;
                 logger.info(['Main'],'Shutting Down...');
                 await pluginManager.stopPlugins();
                 app.quit();
